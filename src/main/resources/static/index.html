@@ -1,0 +1,18 @@
+<html>
+    <head> </head>
+    <body>
+        <h1>Hello Ktor!</h1>
+        <button id="btn-click-me">Button!! Click me!!</button>
+        <script>
+            document
+                .getElementById("btn-click-me")
+                .addEventListener("click", () => {
+                    document.querySelector("body").outerHTML += fetch("/").then(
+                        (response) => {
+                            return response.body;
+                        }
+                    );
+                });
+        </script>
+    </body>
+</html>
