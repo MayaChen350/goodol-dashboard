@@ -21,13 +21,11 @@ fun Application.configureRouting() {
         path = "/webjars" //defaults to /webjars
     }
     routing {
-        get("/") {
-            call.respondText("Hello World!")
-        }
         get("/webjars") {
             call.respondText("<script src='/webjars/jquery/jquery.js'></script>", ContentType.Text.Html)
         }
         // Static plugin. Try to access `/static/index.html`
-        staticResources("/static", "static")
+        staticResources("/", "static")
+        staticResources("/scripts", "static/scripts")
     }
 }

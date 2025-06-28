@@ -8,14 +8,6 @@
     <body>
         <h1>Hello Ktor!</h1>
         <button id="btn-click-me">Button!! Click me!!</button>
-        <script>
-            document
-                .getElementById("btn-click-me")
-                .addEventListener("click", async () => {
-                    const data = await fetch("/html-dsl");
-                    document.querySelector("body").outerHTML +=
-                        await data.text();
-                });
-        </script>
     </body>
+    <script src="scripts/main.js"></script>
 </html>
