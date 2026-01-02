@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "vite build && echo http://$(hostname -I):3000/",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
@@ -13,10 +13,16 @@
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^7.0.0",
+		"@sveltejs/adapter-node": "^5.4.0",
 		"@sveltejs/kit": "^2.49.1",
 		"@sveltejs/vite-plugin-svelte": "^6.2.1",
+		"@tailwindcss/vite": "^4.1.18",
+		"@vitejs/plugin-legacy": "^7.2.1",
+		"daisyui": "^5.5.14",
 		"svelte": "^5.45.6",
 		"svelte-check": "^4.3.4",
+		"tailwindcss": "^4.1.18",
+		"terser": "^5.44.1",
 		"typescript": "^5.9.3",
 		"vite": "^7.2.6"
 	}
