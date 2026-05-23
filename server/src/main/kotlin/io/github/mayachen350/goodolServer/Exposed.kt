@@ -1,4 +1,4 @@
-package io.github.mayachen350
+package io.github.mayachen350.goodolServer
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*

@@ -1,10 +1,9 @@
-package io.github.mayachen350
+package io.github.mayachen350.goodolServer
 
 import io.ktor.server.application.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.plugins.cachingheaders.*
-import io.ktor.server.response.*
 import io.ktor.server.plugins.cors.routing.*
 import com.ucasoft.ktor.simpleCache.SimpleCache
 import com.ucasoft.ktor.simpleMemoryCache.*

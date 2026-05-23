@@ -1,9 +1,6 @@
-package io.github.mayachen350
+package io.github.mayachen350.goodolServer
 
 import io.ktor.resources.*
-import io.ktor.server.application.*
-import io.ktor.server.resources.*
-import io.ktor.server.resources.Resources
 import kotlinx.serialization.Serializable
 
 @Serializable

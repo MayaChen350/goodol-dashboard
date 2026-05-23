@@ -1,4 +1,4 @@
-package io.github.mayachen350
+package io.github.mayachen350.goodolServer
 
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -6,10 +6,7 @@ import io.ktor.server.routing.*
 import com.ucasoft.ktor.simpleCache.cacheOutput
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
-import io.ktor.resources.*
 import io.ktor.server.resources.*
-import io.ktor.server.resources.Resources
-import kotlinx.serialization.Serializable
 import io.ktor.server.http.content.*
 import io.ktor.server.sessions.*
 

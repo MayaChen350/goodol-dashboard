@@ -1,4 +1,4 @@
-package io.github.mayachen350
+package io.github.mayachen350.goodolServer
 
 import kotlinx.serialization.Serializable
 

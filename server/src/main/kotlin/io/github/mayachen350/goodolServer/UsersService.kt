@@ -1,4 +1,4 @@
-package io.github.mayachen350
+package io.github.mayachen350.goodolServer
 
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.singleOrNull
