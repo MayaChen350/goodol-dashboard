@@ -1,8 +1,20 @@
 package io.github.mayachen350.goodolServer
 
+import io.github.mayachen350.goodolServer.application.*
+import io.ktor.server.application.Application
+import io.ktor.server.cio.*
 import io.ktor.server.engine.*
-import io.ktor.server.application.*
-import io.ktor.server.cio.CIO
+
+suspend fun Application.rootModule() {
+    configureExposed()
+    configureStatusPages()
+    configureResources()
+    configureRequestValidation()
+    configureHttp()
+    configureSerialization()
+    configureSessionCookies()
+    configureRouting()
+}
 
 fun main(args: Array<String>) {
     embeddedServer(

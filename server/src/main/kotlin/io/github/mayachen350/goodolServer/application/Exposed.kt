@@ -1,5 +1,7 @@
-package io.github.mayachen350.goodolServer
+package io.github.mayachen350.goodolServer.application
 
+import io.github.mayachen350.goodolServer.data.services.ExposedUser
+import io.github.mayachen350.goodolServer.data.services.ExposedUserService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.*
 import io.ktor.server.request.receive
