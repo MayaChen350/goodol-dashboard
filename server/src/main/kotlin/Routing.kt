@@ -15,9 +15,7 @@ import io.ktor.server.sessions.*
 
 fun Application.configureRouting() {
     routing {
-        get("/") {
-            call.respondText("Hello, World!")
-        }
+        staticResources("/static", "static")
         cacheOutput(2.seconds) {
             get("/short") {
                 call.respond(Random.nextInt().toString())
@@ -32,7 +30,6 @@ fun Application.configureRouting() {
             // Get all articles ...
             call.respond("List of articles sorted starting from ${article.sort}")
         }
-        staticResources("/static", "static")
         get("/json/kotlinx-serialization") {
             call.respond(mapOf("hello" to "world"))
         }

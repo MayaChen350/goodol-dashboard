@@ -15,6 +15,15 @@ application {
 kotlin {
     jvmToolchain(21)
 }
+
+ktor {
+    openApi {
+        enabled = true
+        codeInferenceEnabled = true
+        onlyCommented = false
+    }
+}
+
 dependencies {
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.cachingHeaders)

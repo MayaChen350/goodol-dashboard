@@ -8,11 +8,13 @@ import io.ktor.server.response.*
 import io.ktor.server.plugins.cors.routing.*
 import com.ucasoft.ktor.simpleCache.SimpleCache
 import com.ucasoft.ktor.simpleMemoryCache.*
+import io.ktor.openapi.OpenApiInfo
 import kotlin.time.Duration.Companion.seconds
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.swagger.*
 import io.ktor.server.routing.*
+import io.ktor.server.routing.openapi.OpenApiDocSource
 
 fun Application.configureHttp() {
     install(CachingHeaders) {
@@ -42,7 +44,7 @@ fun Application.configureHttp() {
         header("X-Engine", "Ktor") // will send this header with each response
     }
     routing {
-        swaggerUI(path = "openapi") {
+        swaggerUI(path = "swagger") {
             /*
              Documentation source configuration goes here.
     
@@ -50,6 +52,10 @@ fun Application.configureHttp() {
              `describe {}` API on routes.  When `openApi` enabled in Gradle, these calls will be automatically injected
              based on your code and comments.
              */
+            info = OpenApiInfo("Goodol Dashboard API", "0.1.0")
+            source = OpenApiDocSource.Routing(ContentType.Application.Json) {
+                routingRoot.descendants()
+            }
         }
     }
 }
