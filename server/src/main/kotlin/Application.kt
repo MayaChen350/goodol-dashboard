@@ -1,15 +1,14 @@
 package io.github.mayachen350
 
-import io.ktor.server.application.*
+import io.ktor.server.application.Application
 
-fun main(args: Array<String>) {
-    io.ktor.server.netty.EngineMain.main(args)
-}
-
-fun Application.module() {
+fun Application.rootModule() {
+    configureExposed()
+    configureStatusPages()
+    configureResources()
+    configureRequestValidation()
+    configureHttp()
     configureSerialization()
-    configureDatabases()
-    configureTemplating()
-    configureHTTP()
+    configureSecurity()
     configureRouting()
 }

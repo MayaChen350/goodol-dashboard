@@ -1,43 +1,43 @@
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.ktor)
-    alias(libs.plugins.kotlin.plugin.serialization)
+    alias(ktorLibs.plugins.ktor)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 group = "io.github.mayachen350"
-version = "0.1.0"
+version = "1.0.0-SNAPSHOT"
 
 application {
-    mainClass = "io.ktor.server.netty.EngineMain"
-
-    val isDevelopment: Boolean = project.ext.has("development")
-    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+    mainClass = "io.ktor.server.cio.EngineMain"
 }
 
-repositories {
-    mavenCentral()
-    maven { url = uri("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/kotlin-js-wrappers") }
+kotlin {
+    jvmToolchain(21)
 }
-
 dependencies {
-    implementation(libs.ktor.server.core)
-    implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.server.content.negotiation)
+    implementation(ktorLibs.serialization.kotlinx.json)
+    implementation(ktorLibs.server.cachingHeaders)
+    implementation(ktorLibs.server.cio)
+    implementation(ktorLibs.server.compression)
+    implementation(ktorLibs.server.contentNegotiation)
+    implementation(ktorLibs.server.core)
+    implementation(ktorLibs.server.cors)
+    implementation(ktorLibs.server.defaultHeaders)
+    implementation(ktorLibs.server.requestValidation)
+    implementation(ktorLibs.server.resources)
+    implementation(ktorLibs.server.routingOpenapi)
+    implementation(ktorLibs.server.sessions)
+    implementation(ktorLibs.server.statusPages)
+    implementation(ktorLibs.server.swagger)
     implementation(libs.exposed.core)
-    implementation(libs.exposed.jdbc)
-    implementation(libs.h2)
-    implementation(libs.ktor.server.html.builder)
-    implementation(libs.kotlinx.html)
-    implementation(libs.kotlin.css)
-    implementation(libs.ktor.serialization.gson)
-    implementation(libs.ktor.server.cors)
-    implementation(libs.ktor.server.webjars)
-    implementation(libs.jquery)
-    implementation(libs.ktor.server.host.common)
-    implementation(libs.ktor.server.netty)
+    implementation(libs.exposed.r2dbc)
+    implementation(libs.h2database.h2)
+    implementation(libs.h2database.r2dbc)
     implementation(libs.logback.classic)
-    implementation(libs.ktor.server.config.yaml)
-    testImplementation(libs.ktor.server.test.host)
-    testImplementation(libs.kotlin.test.junit)
+    implementation(libs.ucasoft.ktorSimpleCache)
+    implementation(libs.ucasoft.ktorSimpleMemoryCache)
+
+    testImplementation(kotlin("test"))
+    testImplementation(ktorLibs.server.testHost)
 }
