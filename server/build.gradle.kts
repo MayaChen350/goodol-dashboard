@@ -41,6 +41,7 @@ dependencies {
     implementation(ktorLibs.server.swagger)
     implementation(libs.exposed.core)
     implementation(libs.exposed.r2dbc)
+    implementation(libs.exposed.datetime)
     implementation(libs.h2database.h2)
     implementation(libs.h2database.r2dbc)
     implementation(libs.logback.classic)
