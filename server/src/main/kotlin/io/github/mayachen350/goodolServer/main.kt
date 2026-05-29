@@ -7,6 +7,7 @@ import io.ktor.server.engine.*
 
 suspend fun Application.rootModule() {
     configureExposed()
+    configureFlyway()
     configureStatusPages()
     configureResources()
     configureRequestValidation()

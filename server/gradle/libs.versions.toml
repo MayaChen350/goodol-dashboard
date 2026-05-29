@@ -3,6 +3,7 @@ exposed = "1.2.0"
 h2 = "2.4.240"
 kotlin = "2.3.21"
 logback = "1.5.21"
+flyway = "10.15.0"
 
 [libraries]
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
@@ -12,9 +13,11 @@ exposed-migration-core = { module = " org.jetbrains.exposed:exposed-migration-co
 exposed-migration-r2dbc = { module = " org.jetbrains.exposed:exposed-migration-r2dbc", version.ref = "exposed" }
 h2database-h2 = { module = "com.h2database:h2", version.ref = "h2" }
 h2database-r2dbc = { module = "io.r2dbc:r2dbc-h2", version = "1.1.0.RELEASE" }
+mariadb = { module = "org.mariadb:r2dbc-mariadb", version = "1.3.0"}
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 ucasoft-ktorSimpleCache = { module = "com.ucasoft.ktor:ktor-simple-cache", version = "0.59.4" }
 ucasoft-ktorSimpleMemoryCache = { module = "com.ucasoft.ktor:ktor-simple-memory-cache", version = "0.59.4" }
+flyway = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

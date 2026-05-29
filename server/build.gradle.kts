@@ -53,7 +53,8 @@ dependencies {
     implementation(libs.exposed.datetime)
     implementation(libs.exposed.migration.core)
     implementation(libs.exposed.migration.r2dbc)
-    implementation("org.mariadb:r2dbc-mariadb:1.3.0")
+    implementation(libs.mariadb)
+    implementation(libs.flyway)
     implementation(libs.h2database.h2)
     implementation(libs.h2database.r2dbc)
     implementation(libs.logback.classic)
@@ -62,4 +63,8 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
+
+    // migrations flyway
+    runtimeOnly("org.flywaydb:flyway-mysql:10.10.0")
+    runtimeOnly("org.mariadb.jdbc:mariadb-java-client:3.5.6")
 }
