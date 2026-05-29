@@ -15,9 +15,9 @@ import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 
 suspend fun Application.configureExposed() {
     val database = R2dbcDatabase.connect(
-        url = "r2dbc:h2:file:///./h2",
-        user = "root",
-        password = "",
+        url = "r2dbc:mariadb://localhost:3306/GoodolDb",
+        user = "dev",
+        password = "password",
     )
     val userService = ExposedUserService(database).also {
         it.createSchema()

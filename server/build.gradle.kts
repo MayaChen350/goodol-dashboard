@@ -1,4 +1,3 @@
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(ktorLibs.plugins.ktor)
@@ -24,6 +23,16 @@ ktor {
     }
 }
 
+// https://github.com/JetBrains/Exposed/blob/1.3.0/documentation-website/Writerside/snippets/exposed-migrations/build.gradle.kts
+tasks.register<JavaExec>("generateMigrationScript") {
+    // TODO: Make this script with parameters so I don't have to recompile... and pollute the git repo
+
+    group = "application"
+    description = "Generate a migration script"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass = "io.github.mayachen350.goodolServer.data.MigrationMainKt"
+}
+
 dependencies {
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.cachingHeaders)
@@ -42,6 +51,9 @@ dependencies {
     implementation(libs.exposed.core)
     implementation(libs.exposed.r2dbc)
     implementation(libs.exposed.datetime)
+    implementation(libs.exposed.migration.core)
+    implementation(libs.exposed.migration.r2dbc)
+    implementation("org.mariadb:r2dbc-mariadb:1.3.0")
     implementation(libs.h2database.h2)
     implementation(libs.h2database.r2dbc)
     implementation(libs.logback.classic)
