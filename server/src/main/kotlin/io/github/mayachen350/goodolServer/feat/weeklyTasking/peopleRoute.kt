@@ -1,14 +1,18 @@
 package io.github.mayachen350.goodolServer.feat.weeklyTasking
 
-import io.ktor.server.request.*
+import io.github.mayachen350.goodolServer.data.services.WeeklyTaskingService
+import io.github.mayachen350.goodolServer.data.tables.ResponsiblesTable
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.includePeopleRoutes() {
     route("/people") {
-        post {
-            val data = call.receive<SomeoneDTO>()
-
-            println(data)
+        get {
+            call.respond<List<SomeoneDisplayDTO>>(WeeklyTaskingService.getAllPeople().map {
+                with(ResponsiblesTable) {
+                    SomeoneDisplayDTO(it.get(id).value, it.get(name), it.get(chosenColorRGB))
+                }
+            })
         }
     }
 }

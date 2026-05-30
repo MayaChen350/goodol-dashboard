@@ -11,5 +11,6 @@ fun Application.configureFlyway() {
         )
 //        .baselineOnMigrate(true) // Used when migrating an existing database for the first time
         .load()
+        .also { if (!it.validateWithResult().validationSuccessful) it.repair() }
         .migrate()
 }
