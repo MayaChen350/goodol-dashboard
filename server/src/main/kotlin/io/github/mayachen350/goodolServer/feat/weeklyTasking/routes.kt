@@ -5,5 +5,6 @@ import io.ktor.server.routing.*
 fun Route.includeWeeklyTaskingRoutes() {
     route("/weeklyTasking") {
         includeTasksRoutes()
+        includePeopleRoutes()
     }
 }
