@@ -2,6 +2,7 @@ package io.github.mayachen350.goodolServer.data.tables
 
 import kotlinx.datetime.DayOfWeek
 import org.jetbrains.exposed.v1.core.Table
+import org.jetbrains.exposed.v1.core.between
 import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
 import org.jetbrains.exposed.v1.datetime.date
 
@@ -17,16 +18,20 @@ object CategoriesTable : IntIdTable("weekly_tasking__categories") {
 object TaskTodosTable : IntIdTable("weekly_tasking__task_todos") {
     val task = reference("task_id", TasksTable)
     val weekId = reference("week_id", WeeksTable.id)
-    val weekDay = enumeration("week_day", DayOfWeek::class)
+    val weekDay = enumeration("week_day", DayOfWeek::class).check {
+        it.between(DayOfWeek.MONDAY, DayOfWeek.SUNDAY) // oh no, the secret 8th day of the week!!
+    }
     val responsibleId = reference("responsible_id", ResponsiblesTable)
 }
 
 object ResponsiblesTable : IntIdTable("weekly_tasking__responsibles") {
-    val name = varchar("display_name", 100)
+    val name = varchar("display_name", 100).uniqueIndex()
+    val chosenColorRGB = uinteger("chosen_color")
 }
 
 object WeeksTable : Table("weekly_tasking__weeks") {
-    val id = integer("id") // important: this should NEVER be auto incremented as this would break the way the browser client interacts with the server
+    val id =
+        integer("id") // important: this should NEVER be auto incremented as this would break the way the browser client interacts with the server
     val startDate = date("start_date").uniqueIndex()
     val endDate = date("end_date").uniqueIndex()
 
