@@ -6,5 +6,6 @@ fun Route.includeWeeklyTaskingRoutes() {
     route("/weeklyTasking") {
         includeTasksRoutes()
         includePeopleRoutes()
+        includeWeekRoutes()
     }
 }

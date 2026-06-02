@@ -25,7 +25,9 @@ Goal is to informatize a "system" that was literally placing dots on plasticized
     - [ ] Edit fields
     - [X] Get them
 - [ ] Weeks
-    - [ ] Create a new week
+    - [X] Create a new week
+    - [ ] Get/Create current week id based on date sent
+    - [ ] Garbage collect weeks with no tasks
 
 ### Frontend
 

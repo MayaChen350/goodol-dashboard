@@ -33,6 +33,10 @@ tasks.register<JavaExec>("generateMigrationScript") {
     mainClass = "io.github.mayachen350.goodolServer.data.MigrationMainKt"
 }
 
+tasks.test {
+    useJUnitPlatform()
+}
+
 dependencies {
     implementation(ktorLibs.serialization.kotlinx.json)
     implementation(ktorLibs.server.cachingHeaders)
@@ -63,6 +67,8 @@ dependencies {
     testImplementation(libs.h2database.r2dbc)
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
+    // Source: https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+    testImplementation("org.junit.jupiter:junit-jupiter-api:6.1.0")
 
     // migrations flyway
     runtimeOnly("org.flywaydb:flyway-mysql:10.10.0")
