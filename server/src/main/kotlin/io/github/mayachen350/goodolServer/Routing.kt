@@ -5,11 +5,13 @@ import io.ktor.http.*
 import io.ktor.openapi.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.swagger.*
+import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 import io.ktor.server.routing.openapi.*
 
 fun Application.configureRouting() {
     routing {
+        get("/") { call.respond("OK") } // testing for server response endpoint
         swaggerUI(path = "swagger") {
             /*
              Documentation source configuration goes here.

@@ -5,9 +5,8 @@ import io.ktor.server.application.Application
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
 
-suspend fun Application.rootModule() {
-    configureExposed()
-    configureFlyway()
+suspend fun Application.rootModule(dbConnection: DbConnection) {
+    configureExposed(dbConnection)
     configureStatusPages()
     configureResources()
     configureRequestValidation()
@@ -22,6 +21,9 @@ fun main(args: Array<String>) {
         factory = CIO,
         port = 3843,
         host = "0.0.0.0",
-        module = Application::rootModule
+        module = {
+            rootModule(MariaDBConnection)
+            configureFlyway(MariaDBConnection)
+        }
     ).start(wait = true)
 }

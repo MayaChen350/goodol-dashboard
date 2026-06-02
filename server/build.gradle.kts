@@ -55,12 +55,12 @@ dependencies {
     implementation(libs.exposed.migration.r2dbc)
     implementation(libs.mariadb)
     implementation(libs.flyway)
-    implementation(libs.h2database.h2)
-    implementation(libs.h2database.r2dbc)
     implementation(libs.logback.classic)
     implementation(libs.ucasoft.ktorSimpleCache)
     implementation(libs.ucasoft.ktorSimpleMemoryCache)
 
+    testImplementation(libs.h2database.h2)
+    testImplementation(libs.h2database.r2dbc)
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
 
