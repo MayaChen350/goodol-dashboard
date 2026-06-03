@@ -8,9 +8,9 @@ import io.ktor.server.routing.*
 fun Route.includePeopleRoutes() {
     route("/people") {
         get {
-            call.respond<List<SomeoneDisplayDTO>>(WeeklyTaskingService.getAllPeople().map {
+            call.respond<List<SomeoneDisplayDTO>>(WeeklyTaskingService.People.getAllPeople().map {
                 with(ResponsiblesTable) {
-                    SomeoneDisplayDTO(it.get(id).value, it.get(name), it.get(chosenColorRGB))
+                    SomeoneDisplayDTO(it[id].value, it[name], it[chosenColorRGB])
                 }
             })
         }
