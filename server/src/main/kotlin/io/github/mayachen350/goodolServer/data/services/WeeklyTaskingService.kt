@@ -2,7 +2,9 @@ package io.github.mayachen350.goodolServer.data.services
 
 import io.github.mayachen350.goodolServer.application.database
 import io.github.mayachen350.goodolServer.data.tables.ResponsiblesTable
+import io.github.mayachen350.goodolServer.data.tables.TasksTable
 import io.github.mayachen350.goodolServer.data.tables.WeeksTable
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.WeekDTO
 import io.github.mayachen350.goodolServer.utils.atEndOfWeek
 import io.github.mayachen350.goodolServer.utils.atStartOfWeek
@@ -61,6 +63,15 @@ object WeeklyTaskingService {
             val correctedDate = date.atStartOfWeek()
 
             WeeksTable.select(WeeksTable.id).where { WeeksTable.startDate eq correctedDate }.singleOrNull()
+        }
+    }
+
+    object Tasks {
+        suspend fun createNewTask(task: TaskDTO) = suspendTransaction(database) {
+            TasksTable.insert {
+                it[name] = task.name
+                it[categoryId] = categoryId
+            }
         }
     }
 }

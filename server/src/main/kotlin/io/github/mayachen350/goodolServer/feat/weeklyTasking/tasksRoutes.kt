@@ -1,8 +1,11 @@
 package io.github.mayachen350.goodolServer.feat.weeklyTasking
 
+import io.github.mayachen350.goodolServer.data.services.WeeklyTaskingService
+import io.ktor.http.HttpStatusCode
 import io.ktor.resources.*
 import io.ktor.server.request.*
 import io.ktor.server.resources.*
+import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 
 @Resource("/tasks")
@@ -23,7 +26,8 @@ fun Route.includeTasksRoutes() {
     }
     post("/tasks") {
         with(call.receive<TaskDTO>()) {
-            println(this)
+            WeeklyTaskingService.Tasks.createNewTask(this)
+            call.respond(HttpStatusCode.Created, "New task created!")
         }
     }
 
