@@ -2,6 +2,7 @@ package io.github.mayachen350.goodolServer.feat.weeklyTasking
 
 import io.github.mayachen350.goodolServer.data.services.WeeklyTaskingService
 import io.github.mayachen350.goodolServer.data.tables.WeeksTable
+import io.github.mayachen350.goodolServer.utils.catchConflicts
 import io.github.mayachen350.goodolServer.utils.today
 import io.ktor.http.*
 import io.ktor.server.request.*
@@ -20,13 +21,9 @@ fun Route.includeWeekRoutes() {
                 return@post
             }
 
-            try {
+            catchConflicts {
                 WeeklyTaskingService.Weeks.createNewWeek(weekData)
                 call.respond(HttpStatusCode.Created, "Successfully registered new week in the database.")
-            } catch (e: Exception) {
-                if (e.message != null && (e.message!!.contains("Duplicate entry") || e.message!!.startsWith("Unique index")))
-                    call.respond(HttpStatusCode.Conflict, e.message.toString())
-                else throw e
             }
         }
 

@@ -62,6 +62,8 @@ dependencies {
     implementation(libs.logback.classic)
     implementation(libs.ucasoft.ktorSimpleCache)
     implementation(libs.ucasoft.ktorSimpleMemoryCache)
+    implementation("io.arrow-kt:arrow-core:2.2.3")
+    implementation("io.arrow-kt:arrow-fx-coroutines:2.2.3")
 
     testImplementation(libs.h2database.h2)
     testImplementation(libs.h2database.r2dbc)
