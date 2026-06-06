@@ -1,8 +1,5 @@
-package io.github.mayachen350.goodolServer.data
+package io.github.mayachen350.goodolServer
 
-import io.github.mayachen350.goodolServer.application.DbConnection
-import io.github.mayachen350.goodolServer.application.MariaDBConnection
-import io.github.mayachen350.goodolServer.data.tables.WeeklyTaskingTables
 import org.jetbrains.exposed.v1.core.ExperimentalDatabaseMigrationApi
 import org.jetbrains.exposed.v1.migration.r2dbc.MigrationUtils
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
@@ -23,14 +20,14 @@ suspend fun main(args: Array<String>) {
     println("Migration with name: $migrationName able to be created.")
 
     val database = R2dbcDatabase.connect(
-        url = MariaDBConnection.URL,
-        user = MariaDBConnection.USER,
-        password = MariaDBConnection.PASSWORD,
+        url = _root_ide_package_.io.github.mayachen350.goodolServer.application.MariaDBConnection.URL,
+        user = _root_ide_package_.io.github.mayachen350.goodolServer.application.MariaDBConnection.USER,
+        password = _root_ide_package_.io.github.mayachen350.goodolServer.application.MariaDBConnection.PASSWORD,
     )
 
     suspendTransaction {
         MigrationUtils.generateMigrationScript(
-            tables = WeeklyTaskingTables,
+            tables = _root_ide_package_.io.github.mayachen350.goodolServer.data.tables.WeeklyTaskingTables,
             "src/main/resources/db/migration",
             scriptName = migrationName
         )

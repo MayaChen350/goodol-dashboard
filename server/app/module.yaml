@@ -1,0 +1,63 @@
+product: jvm/app
+
+settings:
+  jvm:
+    release: 21
+    mainClass: io.github.mayachen350.goodolServer.MainKt
+  kotlin:
+      serialization:
+        format: json
+        version: 1.11.0
+      compilerPlugins:
+        - id: io.ktor.plugin
+          dependency: io.ktor:ktor-compiler-plugin:3.5.0
+      freeCompilerArgs:
+        - "-P"
+        - "plugin:io.ktor.plugin:openApi.enabled=true"
+        - "-P"
+        - "plugin:io.ktor.plugin:openApi.codeInferenceEnabled=true"
+        - "-P"
+        - "plugin:io.ktor.plugin:openApi.onlyCommented=false"
+  ktor:
+    enabled: true
+
+
+dependencies:
+  - $ktor.serialization
+  - $ktor.serialization.kotlinx.json
+  - $ktor.server.cachingHeaders
+  - $ktor.server.cio
+  - $ktor.server.compression
+  - $ktor.server.contentNegotiation
+  - $ktor.server.cors
+  - $ktor.server.defaultHeaders
+  - $ktor.server.requestValidation
+  - $ktor.server.resources
+  - $ktor.server.openapi
+  - io.ktor:ktor-server-openapi-jvm:3.5.0
+  - io.ktor:ktor-server-swagger-jvm:3.5.0
+  - io.ktor:ktor-server-routing-openapi-jvm:3.5.0
+  - $ktor.server.sessions
+  - $ktor.server.statusPages
+  - $ktor.server.swagger
+  - $libs.exposed.core
+  - $libs.exposed.r2dbc
+  - $libs.exposed.datetime
+  - $libs.exposed.migration.core
+  - $libs.exposed.migration.r2dbc
+  - $libs.mariadb
+  - $libs.flyway
+  - $libs.logback.classic
+  - $libs.ucasoft.ktorSimpleCache
+  - $libs.ucasoft.ktorSimpleMemoryCache
+
+  - org.flywaydb:flyway-mysql:10.10.0: runtime-only
+  - org.mariadb.jdbc:mariadb-java-client:3.5.6: runtime-only
+
+test-dependencies:
+  - $libs.h2database.h2
+  - $libs.h2database.r2dbc
+  - $kotlin.test
+  - $ktor.server.testHost
+  # Source: https:#mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+  - org.junit.jupiter:junit-jupiter-api:6.1.0

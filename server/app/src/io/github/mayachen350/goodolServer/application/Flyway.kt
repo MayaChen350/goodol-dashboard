@@ -3,7 +3,7 @@ package io.github.mayachen350.goodolServer.application
 import io.ktor.server.application.Application
 import org.flywaydb.core.Flyway
 
-fun Application.configureFlyway(dbConnection: DbConnection) {
+fun Application.configureFlyway(dbConnection: io.github.mayachen350.goodolServer.application.DbConnection) {
     Flyway.configure()
         .dataSource(
             dbConnection.URL.replace("r2dbc", "jdbc"),

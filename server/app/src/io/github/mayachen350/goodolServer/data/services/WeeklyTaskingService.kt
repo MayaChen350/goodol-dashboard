@@ -20,8 +20,8 @@ import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 object WeeklyTaskingService {
     object People {
-        suspend fun getAllPeople() = suspendTransaction(database) {
-            ResponsiblesTable.selectAll().toList()
+        suspend fun getAllPeople() = suspendTransaction(_root_ide_package_.io.github.mayachen350.goodolServer.application.database) {
+            _root_ide_package_.io.github.mayachen350.goodolServer.data.tables.ResponsiblesTable.selectAll().toList()
         }
     }
 

@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/goodol-dashboard.iml" filepath="$PROJECT_DIR$/.idea/goodol-dashboard.iml" />
+      <module fileurl="file://$PROJECT_DIR$/server/migration/migration.iml" filepath="$PROJECT_DIR$/server/migration/migration.iml" />
     </modules>
   </component>
 </project>

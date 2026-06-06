@@ -1,0 +1,11 @@
+product: jvm/app
+
+settings:
+  jvm:
+    release: 21
+    mainClass: io.github.mayachen350.goodolServer.MigrationMainKt
+
+dependencies:
+  - ../app
+  - $libs.exposed.migration.core
+  - $libs.exposed.migration.r2dbc

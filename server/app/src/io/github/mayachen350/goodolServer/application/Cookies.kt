@@ -10,7 +10,7 @@ data class UserSession(val count: Int = 0)
 fun Application.configureSessionCookies() {
 
     install(Sessions) {
-        cookie<UserSession>("session") {
+        cookie<io.github.mayachen350.goodolServer.application.UserSession>("session") {
             cookie.extensions["SameSite"] = "lax"
         }
     }

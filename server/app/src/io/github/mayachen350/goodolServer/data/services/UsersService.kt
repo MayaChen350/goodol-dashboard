@@ -24,7 +24,7 @@ class ExposedUserService(val database: R2dbcDatabase) {
         }
     }
 
-    suspend fun create(user: ExposedUser): UInt = suspendTransaction(database) {
+    suspend fun create(user: io.github.mayachen350.goodolServer.data.services.ExposedUser): UInt = suspendTransaction(database) {
         val newRecord = Users.insert {
             it[name] = user.name
             it[age] = user.age
@@ -32,16 +32,21 @@ class ExposedUserService(val database: R2dbcDatabase) {
         newRecord[Users.id].value
     }
 
-    suspend fun read(id: UInt): ExposedUser? {
+    suspend fun read(id: UInt): io.github.mayachen350.goodolServer.data.services.ExposedUser? {
         return suspendTransaction(database) {
             Users.selectAll()
                 .where { Users.id eq id }
-                .map { ExposedUser(it[Users.name], it[Users.age]) }
+                .map {
+                    _root_ide_package_.io.github.mayachen350.goodolServer.data.services.ExposedUser(
+                        it[Users.name],
+                        it[Users.age]
+                    )
+                }
                 .singleOrNull()
         }
     }
 
-    suspend fun update(id: UInt, user: ExposedUser) {
+    suspend fun update(id: UInt, user: io.github.mayachen350.goodolServer.data.services.ExposedUser) {
         suspendTransaction(database) {
             Users.update({ Users.id eq id }) {
                 it[name] = user.name

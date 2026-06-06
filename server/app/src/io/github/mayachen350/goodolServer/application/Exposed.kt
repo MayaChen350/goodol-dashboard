@@ -10,7 +10,7 @@ interface DbConnection {
     val PASSWORD: String
 }
 
-object MariaDBConnection : DbConnection {
+object MariaDBConnection : io.github.mayachen350.goodolServer.application.DbConnection {
     override val URL = "r2dbc:mariadb://localhost:3306/GoodolDb"
     override val USER = "dev"
     override val PASSWORD = "password"
@@ -19,8 +19,8 @@ object MariaDBConnection : DbConnection {
 // TODO eventually maybe: find a better way to pass the db around by like injecting the database connection or smth
 lateinit var database: R2dbcDatabase
 
-fun Application.configureExposed(dbConnection: DbConnection) {
-    database = R2dbcDatabase.connect(
+fun Application.configureExposed(dbConnection: io.github.mayachen350.goodolServer.application.DbConnection) {
+    _root_ide_package_.io.github.mayachen350.goodolServer.application.database = R2dbcDatabase.connect(
         url = dbConnection.URL,
         user = dbConnection.USER,
         password = dbConnection.PASSWORD,
