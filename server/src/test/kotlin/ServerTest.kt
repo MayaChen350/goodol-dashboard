@@ -1,7 +1,10 @@
 package io.github.mayachen350.goodolServer
 
+import io.github.mayachen350.goodolServer.data.tables.CategoriesTable
+import io.github.mayachen350.goodolServer.data.tables.TasksTable
 import io.github.mayachen350.goodolServer.data.tables.WeeksTable
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.SomeoneDisplayDTO
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.WeekDTO
 import io.github.mayachen350.goodolServer.utils.atEndOfWeek
 import io.github.mayachen350.goodolServer.utils.atStartOfWeek
@@ -15,6 +18,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import org.jetbrains.exposed.v1.core.eq
@@ -29,6 +33,7 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.TestMethodOrder
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 suspend fun ApplicationTestBuilder.setup() {
     application {
@@ -106,7 +111,7 @@ class ServerTest {
                 }.status
             )
 
-            assertEquals(emptyList(),suspendTransaction {
+            assertEquals(emptyList(), suspendTransaction {
                 WeeksTable.selectAll().toList()
             })
         }
@@ -154,6 +159,83 @@ class ServerTest {
 
         suspendTransaction {
             WeeksTable.deleteAll()
+        }
+    }
+
+    @Test
+    fun `test task creation`() = testApplication {
+        setup()
+
+        suspendTransaction {
+            CategoriesTable.insert {
+                it[id] = 2
+                it[name] = "testt"
+            }
+        }
+
+        val task = TaskDTO("testt", 2)
+
+        assertEquals(HttpStatusCode.Created,client.post("/weeklyTasking/tasks") {
+            contentType(ContentType.Application.Json)
+            setBody(Json.encodeToString(task))
+        }.status)
+
+        val response = client.get("/weeklyTasking/tasks")
+        println(response.bodyAsText())
+
+        assertTrue(Json.decodeFromString<Array<TaskDTO>>(response.bodyAsText()).contains(task))
+
+        suspendTransaction {
+            TasksTable.deleteAll()
+        }
+        suspendTransaction {
+            CategoriesTable.deleteAll()
+        }
+    }
+
+    @Test
+    fun `test task creation with conflict`() = testApplication {
+        setup()
+
+        suspendTransaction {
+            CategoriesTable.insert {
+                it[id] = 2
+                it[name] = "test"
+            }
+        }
+
+        suspendTransaction {
+            CategoriesTable.insert {
+                it[id] = 3
+                it[name] = "test 2"
+            }
+        }
+
+        val taskInitial = TaskDTO("Test", 2)
+        val taskSameCategory = TaskDTO("Test 2", 2)
+        val taskSameName = TaskDTO("Test", 3)
+
+        assertEquals(HttpStatusCode.Created,client.post("/weeklyTasking/tasks") {
+            contentType(ContentType.Application.Json)
+            setBody(Json.encodeToString(taskInitial))
+        }.status)
+
+        // this should work
+        assertEquals(HttpStatusCode.Created,client.post("/weeklyTasking/tasks") {
+            contentType(ContentType.Application.Json)
+            setBody(Json.encodeToString(taskSameCategory))
+        }.status)
+
+        assertEquals(HttpStatusCode.Conflict,client.post("/weeklyTasking/tasks") {
+            contentType(ContentType.Application.Json)
+            setBody(Json.encodeToString(taskSameName))
+        }.status)
+
+        suspendTransaction {
+            TasksTable.deleteAll()
+        }
+        suspendTransaction {
+            CategoriesTable.deleteAll()
         }
     }
 }

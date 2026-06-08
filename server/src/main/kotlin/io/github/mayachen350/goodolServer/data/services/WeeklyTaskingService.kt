@@ -67,10 +67,14 @@ object WeeklyTaskingService {
     }
 
     object Tasks {
+        suspend fun getAllTasks() = suspendTransaction(database) {
+            TasksTable.selectAll().toList()
+        }
+
         suspend fun createNewTask(task: TaskDTO) = suspendTransaction(database) {
             TasksTable.insert {
                 it[name] = task.name
-                it[categoryId] = categoryId
+                it[categoryId] = task.categoryId
             }
         }
     }

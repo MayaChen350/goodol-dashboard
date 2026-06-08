@@ -1,6 +1,8 @@
 package io.github.mayachen350.goodolServer.feat.weeklyTasking
 
 import io.github.mayachen350.goodolServer.data.services.WeeklyTaskingService
+import io.github.mayachen350.goodolServer.data.tables.TasksTable
+import io.github.mayachen350.goodolServer.utils.catchConflicts
 import io.ktor.http.HttpStatusCode
 import io.ktor.resources.*
 import io.ktor.server.request.*
@@ -24,10 +26,17 @@ fun Route.includeTasksRoutes() {
     get<Tasks.Id> {
 
     }
+    get("/tasks") {
+        call.respond(WeeklyTaskingService.Tasks.getAllTasks().map {
+            TaskDTO(it[TasksTable.name], it[TasksTable.categoryId].value)
+        })
+    }
     post("/tasks") {
         with(call.receive<TaskDTO>()) {
-            WeeklyTaskingService.Tasks.createNewTask(this)
-            call.respond(HttpStatusCode.Created, "New task created!")
+            catchConflicts {
+                WeeklyTaskingService.Tasks.createNewTask(this)
+                call.respond(HttpStatusCode.Created, "New task created!")
+            }
         }
     }
 
