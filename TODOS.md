@@ -10,14 +10,14 @@ Goal is to informatize a "system" that was literally placing dots on plasticized
 
 - [ ] Tasks
     - [ ] Management (service)
-        - [ ] Add new tasks
+        - [X] Add new tasks
         - [ ] Edit tasks
-        - [ ] Remove tasks
+        - [X] Remove tasks
         - [ ] Assign tasks
     - [ ] Endpoints
-        - [ ] Add a new task
+        - [X] Add a new task
         - [ ] Edit a task
-        - [ ] Remove a task
+        - [X] Remove a task
         - [ ] Assign yourself task (check: no tasks assigned before today)
         - [ ] Get all tasks of a day (with optional person) (default today)
         - [ ] Get all tasks of a week (with optional person) (default today)
@@ -28,6 +28,11 @@ Goal is to informatize a "system" that was literally placing dots on plasticized
     - [X] Create a new week
     - [X] Get/Create current week id based on date sent
     - [ ] Garbage collect weeks with no tasks
+- [ ] Categories
+    - [ ] Add categories
+    - [ ] Edit a category
+    - [ ] Delete a category
+    - [ ] Change a task's category
 
 ### Frontend
 

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @JsonSchema.Title("Task")
-data class TaskDTO(val name: String, val categoryId: Int)
+data class TaskDTO(val name: String, val categoryId: Int?)
 
 @Serializable
 @JsonSchema.Title("Someone")

@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import org.jetbrains.exposed.v1.core.eq
@@ -33,6 +32,7 @@ import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.TestMethodOrder
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 suspend fun ApplicationTestBuilder.setup() {
@@ -175,7 +175,7 @@ class ServerTest {
 
         val task = TaskDTO("testt", 2)
 
-        assertEquals(HttpStatusCode.Created,client.post("/weeklyTasking/tasks") {
+        assertEquals(HttpStatusCode.Created, client.post("/weeklyTasking/tasks") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(task))
         }.status)
@@ -215,21 +215,67 @@ class ServerTest {
         val taskSameCategory = TaskDTO("Test 2", 2)
         val taskSameName = TaskDTO("Test", 3)
 
-        assertEquals(HttpStatusCode.Created,client.post("/weeklyTasking/tasks") {
+        assertEquals(HttpStatusCode.Created, client.post("/weeklyTasking/tasks") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(taskInitial))
         }.status)
 
         // this should work
-        assertEquals(HttpStatusCode.Created,client.post("/weeklyTasking/tasks") {
+        assertEquals(HttpStatusCode.Created, client.post("/weeklyTasking/tasks") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(taskSameCategory))
         }.status)
 
-        assertEquals(HttpStatusCode.Conflict,client.post("/weeklyTasking/tasks") {
+        assertEquals(HttpStatusCode.Conflict, client.post("/weeklyTasking/tasks") {
             contentType(ContentType.Application.Json)
             setBody(Json.encodeToString(taskSameName))
         }.status)
+
+        suspendTransaction {
+            TasksTable.deleteAll()
+        }
+        suspendTransaction {
+            CategoriesTable.deleteAll()
+        }
+    }
+
+    @Test
+    fun `test task deletion`() = testApplication {
+        setup()
+
+        suspendTransaction {
+            CategoriesTable.insert {
+                it[id] = 2
+                it[name] = "testt"
+            }
+        }
+
+        val task = TaskDTO("Test", 2)
+
+        assertEquals(
+            HttpStatusCode.NotFound,
+            client.delete("/weeklyTasking/tasks/${task.name}").status
+        )
+
+        assertEquals(HttpStatusCode.Created, client.post("/weeklyTasking/tasks") {
+            contentType(ContentType.Application.Json)
+            setBody(Json.encodeToString(task))
+        }.status)
+
+        assertEquals(
+            HttpStatusCode.Gone,
+            client.delete("/weeklyTasking/tasks/${task.name}").status
+        )
+
+        val response = client.get("/weeklyTasking/tasks")
+        println(response.bodyAsText())
+
+        assertFalse(Json.decodeFromString<Array<TaskDTO>>(response.bodyAsText()).contains(task))
+
+        assertEquals(
+            HttpStatusCode.NotFound,
+            client.delete("/weeklyTasking/tasks/${task.name}").status
+        )
 
         suspendTransaction {
             TasksTable.deleteAll()

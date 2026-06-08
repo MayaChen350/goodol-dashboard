@@ -1,5 +1,6 @@
 package io.github.mayachen350.goodolServer.data.services
 
+import arrow.core.nel
 import io.github.mayachen350.goodolServer.application.database
 import io.github.mayachen350.goodolServer.data.tables.ResponsiblesTable
 import io.github.mayachen350.goodolServer.data.tables.TasksTable
@@ -15,9 +16,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.r2dbc.insert
-import org.jetbrains.exposed.v1.r2dbc.select
-import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.r2dbc.*
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 
 object WeeklyTaskingService {
@@ -68,13 +67,56 @@ object WeeklyTaskingService {
 
     object Tasks {
         suspend fun getAllTasks() = suspendTransaction(database) {
-            TasksTable.selectAll().toList()
+            TasksTable.selectAll().where { TasksTable.isDeleted eq false }.toList()
         }
 
-        suspend fun createNewTask(task: TaskDTO) = suspendTransaction(database) {
-            TasksTable.insert {
-                it[name] = task.name
-                it[categoryId] = task.categoryId
+        suspend fun existsByName(name: String): Boolean = suspendTransaction(database) {
+            TasksTable.selectAll()
+                .where { TasksTable.name eq name }
+                .andWhere { TasksTable.isDeleted eq false }
+                .toList().any()
+        }
+
+        /**Create a new task in the database IF it's not already present but deleted.
+         *
+         * If it is, toggle the deleted state. */
+        suspend fun createNewTask(task: TaskDTO) {
+            val taskIdThatExistedBefore: Int? = suspendTransaction {
+                TasksTable.select(TasksTable.id)
+                    .where { TasksTable.isDeleted eq true }
+                    .andWhere { TasksTable.name eq task.name }
+                    .singleOrNull()?.get(TasksTable.id)?.value
+            }
+
+            if (taskIdThatExistedBefore == null) {
+                suspendTransaction(database) {
+                    TasksTable.insert {
+                        it[name] = task.name
+                        it[categoryId] = task.categoryId
+                    }
+                }
+            } else {
+                suspendTransaction(database) {
+                    TasksTable.update(where = {
+                        TasksTable.id eq taskIdThatExistedBefore
+                    }) {
+                        it[isDeleted] = false
+                    }
+                }
+            }
+        }
+
+        /**This function does *not* actually delete any task in the database, but *mark it* as deleted.
+         *
+         * This is to prevent accidental damage to the DB's content, and to be able to safely undo.
+         *
+         * Garbage collection for marked as deleted tasks could eventually be done later to not fill the database.
+         * (Especially for tasks with no Todos assigned to it)*/
+        suspend fun deleteTaskByName(name: String) = suspendTransaction(database) {
+            TasksTable.update(where = {
+                TasksTable.name eq name
+            }) {
+                it[isDeleted] = true
             }
         }
     }

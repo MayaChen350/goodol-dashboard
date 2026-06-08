@@ -8,7 +8,8 @@ import org.jetbrains.exposed.v1.datetime.date
 
 object TasksTable : IntIdTable("weekly_tasking__tasks") {
     val name = varchar("title", 100).uniqueIndex()
-    val categoryId = reference("category_id", CategoriesTable)
+    val categoryId = reference("category_id", CategoriesTable).nullable().default(null)
+    val isDeleted = bool("is_deleted").default(false)
 }
 
 object CategoriesTable : IntIdTable("weekly_tasking__categories") {
@@ -23,7 +24,7 @@ object TaskTodosTable : IntIdTable("weekly_tasking__task_todos") {
     }
     val responsibleId = reference("responsible_id", ResponsiblesTable)
         .nullable() // maybe updating to null instead of deleting the task entirely could be good who knows
-                    // or maybe it could means like "waiting to be assigned"
+    // or maybe it could means like "waiting to be assigned"
 
     init {
         // can't have same task same day assigned twice
