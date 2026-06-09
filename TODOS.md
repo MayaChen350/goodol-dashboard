@@ -18,6 +18,7 @@ Goal is to informatize a "system" that was literally placing dots on plasticized
         - [X] Add a new task
         - [X] Edit a task
         - [X] Remove a task
+        - [X] Get all tasks
         - [ ] Assign yourself task (check: no tasks assigned before today)
         - [ ] Get all tasks of a day (with optional person) (default today)
         - [ ] Get all tasks of a week (with optional person) (default today)
@@ -29,20 +30,27 @@ Goal is to informatize a "system" that was literally placing dots on plasticized
     - [X] Get/Create current week id based on date sent
     - [ ] Garbage collect weeks with no tasks
 - [ ] Categories
+    - [ ] Get all categories
     - [ ] Add categories
     - [ ] Edit a category
     - [ ] Delete a category
-    - [ ] Change a task's category
+    - [X] Change a task's category
 
 ### Frontend
 
 - [ ] iPad design
+    - [ ] Main menu
     - [ ] Board
-        - [ ] Show people colors
-        - [ ] Show tasks from current week, grouped by categories
-        - [ ] Show next and early week
-        - [ ] Be able to add new week
-            - [ ] Show no task here by default? with option to show default table to then be able to add a task
-            - [ ] The button "begin assigning" sends the current week data (weekId + startOfWeekDate + endOfWeekDate?)
-        - [ ] Choose who is the current user
-        - [ ] Be able to assign yourself tasks
+      - [ ] Be able to add new tasks
+      - [ ] Be able to edit tasks, rename them and edit their category
+      - [ ] Be able to remove tasks, or put them as HIDDEN in the week
+      - [ ] Show people colors
+      - [ ] Show tasks from current week, grouped by categories
+      - [ ] Show next and early week
+      - [ ] Be able to add new week
+      - [ ] Show no task here by default? with option to show default table to then be able to add a task
+      - [ ] The button "begin assigning" sends the current week data (weekId + startOfWeekDate +
+      endOfWeekDate?)
+      - [ ] Choose who is the current user
+      - [ ] Be able to assign yourself tasks
+      - [ ] Be able to mark a task as COMPLETED
