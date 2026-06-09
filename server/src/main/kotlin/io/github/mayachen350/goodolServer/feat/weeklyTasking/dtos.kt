@@ -5,8 +5,20 @@ import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 
 @Serializable
+@JsonSchema.Title("NewTask")
+data class NewTaskDTO(val name: String, val categoryId: Int?)
+
+@Serializable
 @JsonSchema.Title("Task")
-data class TaskDTO(val name: String, val categoryId: Int?)
+data class TaskDTO(val id: Int, val name: String, val categoryId: Int?)
+
+@Serializable
+@JsonSchema.Title("TaskEdit")
+data class TaskEditDTO(val name: String, val categoryId: Int?)
+
+@Serializable
+@JsonSchema.Title("EditedTask")
+data class EditedTaskDTO(val id: Int, val name: String, val categoryId: Int?)
 
 @Serializable
 @JsonSchema.Title("Someone")

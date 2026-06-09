@@ -14,7 +14,7 @@ suspend inline fun <T> RoutingContext.catchConflicts(crossinline dbCreationActio
         // WeeklyTaskingService.Weeks.createNewWeek(weekData)
         // call.respond(HttpStatusCode.Created, "Successfully registered new week in the database.")
     } catch (e: Exception) {
-        if (e.message != null && (e.message!!.contains("Duplicate entry") || e.message!!.startsWith("Unique index"))) {
+        if (e.message != null && (e.message!!.startsWith("Duplicate entry") || e.message!!.startsWith("Unique index"))) {
             call.respond(HttpStatusCode.Conflict, e.message.toString())
             DatabaseConflict.left()
         } else throw e

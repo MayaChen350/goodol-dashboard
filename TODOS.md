@@ -11,12 +11,12 @@ Goal is to informatize a "system" that was literally placing dots on plasticized
 - [ ] Tasks
     - [ ] Management (service)
         - [X] Add new tasks
-        - [ ] Edit tasks
+        - [X] Edit tasks
         - [X] Remove tasks
         - [ ] Assign tasks
     - [ ] Endpoints
         - [X] Add a new task
-        - [ ] Edit a task
+        - [X] Edit a task
         - [X] Remove a task
         - [ ] Assign yourself task (check: no tasks assigned before today)
         - [ ] Get all tasks of a day (with optional person) (default today)

@@ -1,23 +1,31 @@
 package io.github.mayachen350.goodolServer.data.services
 
-import arrow.core.nel
 import io.github.mayachen350.goodolServer.application.database
+import io.github.mayachen350.goodolServer.data.tables.CategoriesTable
 import io.github.mayachen350.goodolServer.data.tables.ResponsiblesTable
 import io.github.mayachen350.goodolServer.data.tables.TasksTable
 import io.github.mayachen350.goodolServer.data.tables.WeeksTable
-import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskDTO
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.EditedTaskDTO
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewTaskDTO
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskEditDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.WeekDTO
 import io.github.mayachen350.goodolServer.utils.atEndOfWeek
 import io.github.mayachen350.goodolServer.utils.atStartOfWeek
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
+import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.r2dbc.*
+import org.jetbrains.exposed.v1.r2dbc.andWhere
+import org.jetbrains.exposed.v1.r2dbc.insert
+import org.jetbrains.exposed.v1.r2dbc.select
+import org.jetbrains.exposed.v1.r2dbc.selectAll
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
+import org.jetbrains.exposed.v1.r2dbc.update
 
 object WeeklyTaskingService {
     object People {
@@ -65,9 +73,31 @@ object WeeklyTaskingService {
         }
     }
 
+    object Category {
+        suspend fun existsBId(id: Int): Boolean = suspendTransaction(database) {
+            CategoriesTable.selectAll()
+                .where { CategoriesTable.id eq id }
+                .toList().any()
+        }
+    }
+
     object Tasks {
         suspend fun getAllTasks() = suspendTransaction(database) {
             TasksTable.selectAll().where { TasksTable.isDeleted eq false }.toList()
+        }
+
+        suspend fun getTaskById(id: Int) = suspendTransaction {
+            TasksTable.selectAll()
+                .where { TasksTable.id eq id }
+                .andWhere { TasksTable.isDeleted eq false }
+                .singleOrNull()
+        }
+
+        suspend fun existsById(id: Int): Boolean = suspendTransaction(database) {
+            TasksTable.selectAll()
+                .where { TasksTable.id eq id }
+                .andWhere { TasksTable.isDeleted eq false }
+                .toList().any()
         }
 
         suspend fun existsByName(name: String): Boolean = suspendTransaction(database) {
@@ -80,29 +110,76 @@ object WeeklyTaskingService {
         /**Create a new task in the database IF it's not already present but deleted.
          *
          * If it is, toggle the deleted state. */
-        suspend fun createNewTask(task: TaskDTO) {
-            val taskIdThatExistedBefore: Int? = suspendTransaction {
+        suspend fun createNewTask(task: NewTaskDTO): ResultRow {
+            val taskId: Int? = suspendTransaction {
                 TasksTable.select(TasksTable.id)
                     .where { TasksTable.isDeleted eq true }
                     .andWhere { TasksTable.name eq task.name }
+                    .andWhere { TasksTable.categoryId eq task.categoryId }
                     .singleOrNull()?.get(TasksTable.id)?.value
             }
+            val result: ResultRow
 
-            if (taskIdThatExistedBefore == null) {
+            if (taskId == null) {
                 suspendTransaction(database) {
                     TasksTable.insert {
                         it[name] = task.name
                         it[categoryId] = task.categoryId
                     }
                 }
+                result = suspendTransaction {
+                    TasksTable.selectAll()
+                        .where { TasksTable.name eq task.name }
+                        .andWhere { TasksTable.categoryId eq task.categoryId }
+                        .single()
+                }
             } else {
                 suspendTransaction(database) {
                     TasksTable.update(where = {
-                        TasksTable.id eq taskIdThatExistedBefore
+                        TasksTable.id eq taskId
                     }) {
                         it[isDeleted] = false
                     }
                 }
+
+                result = getTaskById(taskId)!!
+            }
+
+            return result
+        }
+
+        suspend fun editTask(id: Int, editDTO: TaskEditDTO) = suspendTransaction {
+            TasksTable.update(where = {
+                TasksTable.id eq id
+            }) {
+                it[name] = editDTO.name
+                it[categoryId] = editDTO.categoryId
+            }
+
+            // update returning does not currently work in MariaDB
+
+            getTaskById(id)!!.let {
+                EditedTaskDTO(
+                    it[TasksTable.id].value,
+                    it[TasksTable.name],
+                    it[TasksTable.categoryId]?.value
+                )
+            }
+        }
+
+        suspend fun renameTask(id: Int, newName: String) = suspendTransaction {
+            TasksTable.update(where = {
+                TasksTable.id eq id
+            }) {
+                it[name] = newName
+            }
+        }
+
+        suspend fun editTaskCategory(id: Int, newCategoryId: Int) = suspendTransaction {
+            TasksTable.update(where = {
+                TasksTable.id eq id
+            }) {
+                it[categoryId] = newCategoryId
             }
         }
 
