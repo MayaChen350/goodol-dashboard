@@ -5,6 +5,7 @@ import io.github.mayachen350.goodolServer.data.tables.CategoriesTable
 import io.github.mayachen350.goodolServer.data.tables.ResponsiblesTable
 import io.github.mayachen350.goodolServer.data.tables.TasksTable
 import io.github.mayachen350.goodolServer.data.tables.WeeksTable
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.CategoryDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.EditedTaskDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewTaskDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskEditDTO
@@ -80,9 +81,22 @@ object WeeklyTaskingService {
                 .toList().any()
         }
 
+        suspend fun exists(category: CategoryDTO): Boolean = suspendTransaction {
+            CategoriesTable.selectAll()
+                .where { CategoriesTable.id eq category.id }
+                .andWhere { CategoriesTable.name eq category.name }
+                .toList().any()
+        }
+
         suspend fun getByName(name: String) = suspendTransaction {
             CategoriesTable.selectAll()
                 .where { CategoriesTable.name eq name }
+                .singleOrNull()
+        }
+
+        suspend fun getById(id: Int) = suspendTransaction {
+            CategoriesTable.selectAll()
+                .where { CategoriesTable.id eq id }
                 .singleOrNull()
         }
 
@@ -99,6 +113,18 @@ object WeeklyTaskingService {
             }
 
             return getByName(name)!!
+        }
+
+        suspend fun rename(id: Int, name: String): ResultRow {
+            suspendTransaction {
+                CategoriesTable.update(where = {
+                    CategoriesTable.id eq id
+                }) {
+                    it[CategoriesTable.name] = name
+                }
+            }
+
+            return getById(id)!!
         }
     }
 

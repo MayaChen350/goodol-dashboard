@@ -396,4 +396,50 @@ class ServerTest {
         }
 
     }
+
+    @Test
+    fun `test rename category`(): Unit = testApplication {
+        setup()
+
+        // test not found
+        assertEquals(
+            HttpStatusCode.NotFound,
+            client.put("/weeklyTasking/categories/rename/500").status
+        )
+
+        val testId: Int =
+            Json.decodeFromString<CategoryDTO>(client.post("/weeklyTasking/categories/Eucli").bodyAsText())
+                .id
+
+        // test not modified (I included that for some reason, but that should most likely be done to the client)
+        assertEquals(
+            HttpStatusCode.NotModified,
+            client.put("/weeklyTasking/categories/rename/${testId}") {
+                setBody("Eucli")
+            }.status
+        )
+
+        // actual modification test
+        assertEquals(
+            CategoryDTO(testId, "Euclid"),
+            Json.decodeFromString<CategoryDTO>(client.put("/weeklyTasking/categories/rename/${testId}") {
+                setBody("Euclid")
+            }.bodyAsText())
+        )
+
+        // test conflict
+        suspendTransaction {
+            CategoriesTable.insert {
+                it[CategoriesTable.id] = testId + 1
+                it[CategoriesTable.name] = "Keter"
+            }
+        }
+
+        assertEquals(
+            HttpStatusCode.Conflict,
+            client.put("/weeklyTasking/categories/rename/${testId}") {
+                setBody("Keter")
+            }.status
+        )
+    }
 }

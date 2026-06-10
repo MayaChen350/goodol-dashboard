@@ -32,7 +32,7 @@ Goal is to informatize a "system" that was literally placing dots on plasticized
 - [ ] Categories
     - [X] Get all categories
     - [X] Add categories
-    - [ ] Edit a category
+    - [X] Edit a category
     - [ ] Delete a category
     - [X] Change a task's category
 
