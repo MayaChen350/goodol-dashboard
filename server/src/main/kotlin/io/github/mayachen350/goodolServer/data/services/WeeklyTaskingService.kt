@@ -79,6 +79,27 @@ object WeeklyTaskingService {
                 .where { CategoriesTable.id eq id }
                 .toList().any()
         }
+
+        suspend fun getByName(name: String) = suspendTransaction {
+            CategoriesTable.selectAll()
+                .where { CategoriesTable.name eq name }
+                .singleOrNull()
+        }
+
+        suspend fun getAll() = suspendTransaction(database) {
+            CategoriesTable.selectAll()
+                .toList()
+        }
+
+        suspend fun createNew(name: String): ResultRow {
+            suspendTransaction {
+                CategoriesTable.insert {
+                    it[CategoriesTable.name] = name
+                }
+            }
+
+            return getByName(name)!!
+        }
     }
 
     object Tasks {

@@ -27,3 +27,7 @@ data class SomeoneDisplayDTO(val id: Int, val name: String, val chosenColor: UIn
 @Serializable
 @JsonSchema.Title("Week")
 data class WeekDTO(val weekId: UInt, val date: LocalDate)
+
+@Serializable
+@JsonSchema.Title("Category")
+data class CategoryDTO(val id: Int, val name: String)

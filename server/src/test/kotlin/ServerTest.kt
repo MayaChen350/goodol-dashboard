@@ -3,6 +3,7 @@ package io.github.mayachen350.goodolServer
 import io.github.mayachen350.goodolServer.data.tables.CategoriesTable
 import io.github.mayachen350.goodolServer.data.tables.TasksTable
 import io.github.mayachen350.goodolServer.data.tables.WeeksTable
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.CategoryDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewTaskDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.SomeoneDisplayDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskDTO
@@ -368,5 +369,31 @@ class ServerTest {
 
         val allChangedData = Json.decodeFromString<TaskDTO>(client.get("/weeklyTasking/tasks/2").bodyAsText())
         assertTrue { allChangedData.categoryId == null && allChangedData.name == ":3" }
+    }
+
+    @Test
+    fun `test category creation`(): Unit = testApplication {
+        setup()
+
+        val categoryName: String = "category name :3"
+
+        assertEquals(
+            HttpStatusCode.Created,
+            client.post("/weeklyTasking/categories/${categoryName}").status
+        )
+
+        // test conflict
+        assertEquals(
+            HttpStatusCode.Conflict,
+            client.post("/weeklyTasking/categories/${categoryName}").status
+        )
+
+        // test the get all endpoint
+        assertTrue {
+            Json.decodeFromString<List<CategoryDTO>>(client.get("/weeklyTasking/categories").bodyAsText()).any {
+                it.name == categoryName
+            }
+        }
+
     }
 }

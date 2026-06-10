@@ -30,8 +30,8 @@ Goal is to informatize a "system" that was literally placing dots on plasticized
     - [X] Get/Create current week id based on date sent
     - [ ] Garbage collect weeks with no tasks
 - [ ] Categories
-    - [ ] Get all categories
-    - [ ] Add categories
+    - [X] Get all categories
+    - [X] Add categories
     - [ ] Edit a category
     - [ ] Delete a category
     - [X] Change a task's category
