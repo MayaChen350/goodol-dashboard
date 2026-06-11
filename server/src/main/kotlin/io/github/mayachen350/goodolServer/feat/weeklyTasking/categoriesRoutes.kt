@@ -2,7 +2,6 @@ package io.github.mayachen350.goodolServer.feat.weeklyTasking
 
 import io.github.mayachen350.goodolServer.data.services.WeeklyTaskingService
 import io.github.mayachen350.goodolServer.data.tables.CategoriesTable
-import io.github.mayachen350.goodolServer.utils.catchConflicts
 import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
 import io.ktor.server.request.receive
@@ -38,14 +37,12 @@ fun Route.includeCategoriesRoutes() {
     }
 
     post<Categories.Name> {
-        catchConflicts {
-            call.respond<CategoryDTO>(
-                HttpStatusCode.Created,
-                WeeklyTaskingService.Category.createNew(it.name).let {
-                    CategoryDTO(it[CategoriesTable.id].value, it[CategoriesTable.name])
-                }
-            )
-        }
+        call.respond<CategoryDTO>(
+            HttpStatusCode.Created,
+            WeeklyTaskingService.Category.createNew(it.name).let {
+                CategoryDTO(it[CategoriesTable.id].value, it[CategoriesTable.name])
+            }
+        )
     }
 
     put<Categories.Rename.Id> {
@@ -59,14 +56,12 @@ fun Route.includeCategoriesRoutes() {
             return@put call.respond<CategoryDTO>(HttpStatusCode.NotModified, categoryWithNewName)
         }
 
-        catchConflicts {
-            call.respond<CategoryDTO>(
-                HttpStatusCode.OK,
-                WeeklyTaskingService.Category.rename(it.id, categoryWithNewName.name).let {
-                    CategoryDTO(it[CategoriesTable.id].value, it[CategoriesTable.name])
-                }
-            )
-        }
+        call.respond<CategoryDTO>(
+            HttpStatusCode.OK,
+            WeeklyTaskingService.Category.rename(it.id, categoryWithNewName.name).let {
+                CategoryDTO(it[CategoriesTable.id].value, it[CategoriesTable.name])
+            }
+        )
     }
 
     delete<Categories.Id> {
