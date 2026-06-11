@@ -6,6 +6,7 @@ import io.github.mayachen350.goodolServer.utils.catchConflicts
 import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
 import io.ktor.server.request.receive
+import io.ktor.server.resources.delete
 import io.ktor.server.resources.get
 import io.ktor.server.resources.post
 import io.ktor.server.resources.put
@@ -66,5 +67,16 @@ fun Route.includeCategoriesRoutes() {
                 }
             )
         }
+    }
+
+    delete<Categories.Id> {
+        if (!WeeklyTaskingService.Category.existsBId(it.id))
+            return@delete call.respond(HttpStatusCode.NotFound, "No category with that id.")
+
+        val result = WeeklyTaskingService.Category.delete(it.id)
+        if (result.isLeft())
+            return@delete call.respond(HttpStatusCode.Forbidden, "The category still contains tasks!")
+
+        call.respond(HttpStatusCode.OK, "The category has been suppressed.")
     }
 }

@@ -442,4 +442,50 @@ class ServerTest {
             }.status
         )
     }
+
+    @Test
+    fun `test category deletion`(): Unit = testApplication {
+        setup()
+
+        // test not found
+        assertEquals(
+            HttpStatusCode.NotFound,
+            client.delete("/weeklyTasking/categories/20").status
+        )
+
+        suspendTransaction {
+            CategoriesTable.insert {
+                it[id] = 20
+                it[name] = "Medbay"
+            }
+        }
+
+        suspendTransaction {
+            TasksTable.insert {
+                it[id] = 20
+                it[name] = "Scan!1"
+                it[categoryId] = 20
+            }
+        }
+
+        assertEquals(
+            HttpStatusCode.Forbidden,
+            client.delete("/weeklyTasking/categories/20").status
+        )
+
+        client.delete("/weeklyTasking/tasks/Scan!1") // if this wouldn't work, then deleting tasks by name would be an issue 🥀
+        // thinking about it, maybe deleting by id would be better why did I not do that
+
+        assertEquals(
+            HttpStatusCode.OK,
+            client.delete("/weeklyTasking/categories/20").status
+        )
+
+        assertFalse {
+            Json.decodeFromString<List<CategoryDTO>>(client.get("/weeklyTasking/categories").bodyAsText()).any {
+                it.id == 20
+            }
+        }
+    }
+
 }

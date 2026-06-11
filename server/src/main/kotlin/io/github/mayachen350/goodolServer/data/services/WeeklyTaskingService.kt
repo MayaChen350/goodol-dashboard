@@ -1,5 +1,8 @@
 package io.github.mayachen350.goodolServer.data.services
 
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
 import io.github.mayachen350.goodolServer.application.database
 import io.github.mayachen350.goodolServer.data.tables.CategoriesTable
 import io.github.mayachen350.goodolServer.data.tables.ResponsiblesTable
@@ -10,6 +13,7 @@ import io.github.mayachen350.goodolServer.feat.weeklyTasking.EditedTaskDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewTaskDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskEditDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.WeekDTO
+import io.github.mayachen350.goodolServer.utils.HasChildrenError
 import io.github.mayachen350.goodolServer.utils.atEndOfWeek
 import io.github.mayachen350.goodolServer.utils.atStartOfWeek
 import kotlinx.coroutines.flow.firstOrNull
@@ -22,6 +26,7 @@ import kotlinx.datetime.daysUntil
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.andWhere
+import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.select
 import org.jetbrains.exposed.v1.r2dbc.selectAll
@@ -125,6 +130,31 @@ object WeeklyTaskingService {
             }
 
             return getById(id)!!
+        }
+
+        suspend fun delete(id: Int): Either<HasChildrenError, Unit> {
+            val hasChildren: Boolean = suspendTransaction {
+                TasksTable.selectAll()
+                    .where { TasksTable.categoryId eq id }
+                    .andWhere { TasksTable.isDeleted eq false }
+                    .toList().any()
+            }
+            if (hasChildren) return HasChildrenError.left()
+
+            // Delete remaining task rows, marked as deleted, if any
+            suspendTransaction {
+                TasksTable.deleteWhere {
+                    TasksTable.categoryId eq id
+                }
+            }
+
+            suspendTransaction {
+                CategoriesTable.deleteWhere {
+                    CategoriesTable.id eq id
+                }
+            }
+
+            return Unit.right()
         }
     }
 

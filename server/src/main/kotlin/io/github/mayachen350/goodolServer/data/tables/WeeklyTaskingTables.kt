@@ -1,6 +1,7 @@
 package io.github.mayachen350.goodolServer.data.tables
 
 import kotlinx.datetime.DayOfWeek
+import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.core.between
 import org.jetbrains.exposed.v1.core.dao.id.IntIdTable
@@ -8,7 +9,11 @@ import org.jetbrains.exposed.v1.datetime.date
 
 object TasksTable : IntIdTable("weekly_tasking__tasks") {
     val name = varchar("title", 100).uniqueIndex()
-    val categoryId = reference("category_id", CategoriesTable).nullable().default(null)
+    val categoryId = reference(
+        "category_id",
+        CategoriesTable,
+        onDelete = ReferenceOption.RESTRICT
+    ).nullable().default(null)
     val isDeleted = bool("is_deleted").default(false)
 }
 
