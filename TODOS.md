@@ -14,6 +14,7 @@ Goal is to informatize a "system" that was literally placing dots on plasticized
         - [X] Edit tasks
         - [X] Remove tasks
         - [ ] Assign tasks
+        - [ ] Mark a task as completed
     - [ ] Endpoints
         - [X] Add a new task
         - [X] Edit a task
@@ -22,6 +23,7 @@ Goal is to informatize a "system" that was literally placing dots on plasticized
         - [ ] Assign yourself task (check: no tasks assigned before today)
         - [ ] Get all tasks of a day (with optional person) (default today)
         - [ ] Get all tasks of a week (with optional person) (default today)
+        - [ ] Mark a task as completed
 - [X] People
     - [X] Edit fields
     - [X] Get them

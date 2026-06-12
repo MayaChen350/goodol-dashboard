@@ -22,14 +22,15 @@ object CategoriesTable : IntIdTable("weekly_tasking__categories") {
 }
 
 object TaskTodosTable : IntIdTable("weekly_tasking__task_todos") {
-    val taskId = reference("task_id", TasksTable)
+    val taskId = reference("task_id", TasksTable, onDelete = ReferenceOption.CASCADE)
     val weekId = reference("week_id", WeeksTable.id)
     val weekDay = enumeration("week_day", DayOfWeek::class).check {
         it.between(DayOfWeek.MONDAY, DayOfWeek.SUNDAY) // oh no, the secret 8th day of the week!!
     }
     val responsibleId = reference("responsible_id", ResponsiblesTable)
-        .nullable() // maybe updating to null instead of deleting the task entirely could be good who knows
-    // or maybe it could means like "waiting to be assigned"
+        .nullable() // "waiting to be assigned"
+        .default(null)
+    val isCompleted = bool("is_completed").default(false)
 
     init {
         // can't have same task same day assigned twice
