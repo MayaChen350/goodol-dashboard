@@ -488,4 +488,107 @@ class ServerTest {
         }
     }
 
+    @Test
+    fun `test people edit name`() = testApplication {
+        setup()
+
+        assertEquals(
+            HttpStatusCode.NotFound,
+            client.put("/weeklyTasking/people/0/rename").status
+        )
+
+        assertEquals(
+            HttpStatusCode.Conflict,
+            client.put("/weeklyTasking/people/1/rename") {
+                setBody("bat")
+            }.status
+        )
+
+        assertEquals(
+            HttpStatusCode.OK,
+            client.put("/weeklyTasking/people/1/rename") {
+                setBody("Giratuna")
+            }.status
+        )
+
+        assertTrue {
+            Json.decodeFromString<List<SomeoneDisplayDTO>>(client.get("/weeklyTasking/people").bodyAsText()).any {
+                it.id == 1 && it.name == "Giratuna"
+            }
+        }
+    }
+
+    @Test
+    fun `test people edit color`() = testApplication {
+        setup()
+
+        assertEquals(
+            HttpStatusCode.NotFound,
+            client.put("/weeklyTasking/people/0/color/2").status
+        )
+
+        // test invalid values
+        assertEquals(
+            HttpStatusCode.BadRequest,
+            client.put("/weeklyTasking/people/1/color/num/${UInt.MAX_VALUE}").status
+        )
+
+        assertEquals(
+            HttpStatusCode.BadRequest,
+            client.put("/weeklyTasking/people/1/color/num/${-1}").status
+        )
+
+        assertEquals(
+            HttpStatusCode.BadRequest,
+            client.put("/weeklyTasking/people/1/color/hex/IDGAF").status
+        )
+
+        assertEquals(
+            HttpStatusCode.BadRequest,
+            client.put("/weeklyTasking/people/1/color/hex/12345678").status
+        )
+
+        assertEquals(
+            HttpStatusCode.BadRequest,
+            client.put("/weeklyTasking/people/1/color/num/00f").status
+        )
+
+        // test correct values
+        assertEquals(
+            HttpStatusCode.OK,
+            client.put("/weeklyTasking/people/1/color/num/0").status
+        )
+
+        assertEquals(
+            HttpStatusCode.OK,
+            client.put("/weeklyTasking/people/1/color/hex/0").status
+        )
+
+        assertEquals(
+            HttpStatusCode.OK,
+            client.put("/weeklyTasking/people/1/color/num/00").status
+        )
+
+        assertEquals(
+            HttpStatusCode.OK,
+            client.put("/weeklyTasking/people/1/color/hex/00").status
+        )
+
+        assertEquals(
+            HttpStatusCode.OK,
+            client.put("/weeklyTasking/people/1/color/hex/00f").status
+        )
+
+        assertEquals(
+            HttpStatusCode.OK,
+            client.put("/weeklyTasking/people/1/color/hex/FAFA").status
+        )
+
+        assertTrue {
+            Json.decodeFromString<List<SomeoneDisplayDTO>>(client.get("/weeklyTasking/people").bodyAsText()).any {
+                it.id == 1 && it.chosenColor == 0xFAFAu
+            }
+        }
+    }
+
 }

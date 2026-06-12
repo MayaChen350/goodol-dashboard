@@ -35,8 +35,30 @@ import org.jetbrains.exposed.v1.r2dbc.update
 
 object WeeklyTaskingService {
     object People {
+        suspend fun existsBId(id: Int): Boolean = suspendTransaction {
+            ResponsiblesTable.select(ResponsiblesTable.id)
+                .where { ResponsiblesTable.id eq id }
+                .toList().any()
+        }
+
         suspend fun getAllPeople() = suspendTransaction(database) {
             ResponsiblesTable.selectAll().toList()
+        }
+
+        suspend fun rename(id: Int, newName: String) = suspendTransaction(database) {
+            ResponsiblesTable.update(where = {
+                ResponsiblesTable.id eq id
+            }) {
+                it[name] = newName
+            }
+        }
+
+        suspend fun editColor(id: Int, newColorRGB: UInt) = suspendTransaction(database) {
+            ResponsiblesTable.update(where = {
+                ResponsiblesTable.id eq id
+            }) {
+                it[chosenColorRGB] = newColorRGB
+            }
         }
     }
 
