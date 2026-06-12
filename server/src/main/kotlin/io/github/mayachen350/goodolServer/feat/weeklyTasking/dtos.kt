@@ -31,3 +31,28 @@ data class WeekDTO(val weekId: UInt, val date: LocalDate)
 @Serializable
 @JsonSchema.Title("Category")
 data class CategoryDTO(val id: Int, val name: String)
+
+@Serializable
+@JsonSchema.Title("NewTodo")
+data class NewTodoDTO(
+    val taskId: Int,
+    val weekId: UInt,
+    val responsibleId: Int?
+)
+
+@Serializable
+@JsonSchema.Title("Todo")
+data class TodoDTO(
+    val todoId: Int,
+    val taskId: Int,
+    val weekId: UInt,
+    val responsibleId: Int?,
+    val isCompleted: Boolean
+)
+
+@Serializable
+@JsonSchema.Title("AssignTodo")
+data class AssignTodoDTO(
+    val todoId: Int,
+    val responsibleId: Int?,
+)
