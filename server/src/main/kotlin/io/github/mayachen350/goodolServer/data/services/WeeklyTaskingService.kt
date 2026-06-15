@@ -13,6 +13,7 @@ import io.github.mayachen350.goodolServer.feat.weeklyTasking.CategoryDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.CategoryId
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.EditedTaskDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewTaskDTO
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewTodoDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskEditDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskId
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewWeekDTO
@@ -25,10 +26,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.flow.toList
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.innerJoin
 import org.jetbrains.exposed.v1.r2dbc.andWhere
 import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.insert
@@ -102,6 +105,12 @@ object WeeklyTaskingService {
 
             createNewWeek(NewWeekDTO(weekId, correctedDate))
             return weekId
+        }
+
+        suspend fun getById(id: UInt) = suspendTransaction(database) {
+            WeeksTable.selectAll()
+                .where { WeeksTable.id eq id }
+                .singleOrNull()
         }
 
         suspend fun getByDate(date: LocalDate) = suspendTransaction(database) {
@@ -314,6 +323,58 @@ object WeeklyTaskingService {
             TaskTodosTable.selectAll()
                 .where { TaskTodosTable.id eq id }
                 .toList().any()
+        }
+
+        suspend fun getAllThisDay(date: LocalDate, ofSomeoneId: Int? = null): List<ResultRow> =
+            suspendTransaction(database) {
+                val query = TaskTodosTable
+                    .innerJoin(WeeksTable, { WeeksTable.id }, { TaskTodosTable.id })
+                    .selectAll()
+                    .where { TaskTodosTable.weekDay eq date.dayOfWeek }
+                    .andWhere { WeeksTable.startDate eq date.atStartOfWeek() }
+
+                // lisp type shit
+                (if (ofSomeoneId != null)
+                    query.andWhere { TaskTodosTable.responsibleId eq ofSomeoneId }
+                else
+                    query).toList()
+            }
+
+        suspend fun getAllThisWeek(weekId: UInt, ofSomeoneId: Int? = null): List<ResultRow> =
+            suspendTransaction(database) {
+                val query = TaskTodosTable
+                    .selectAll()
+                    .where { TaskTodosTable.weekId eq weekId }
+
+                // lisp type shit
+                (if (ofSomeoneId != null)
+                    query.andWhere { TaskTodosTable.responsibleId eq ofSomeoneId }
+                else
+                    query).toList()
+            }
+
+        suspend fun create(
+            taskId: Int,
+            weekId: UInt,
+            responsibleId: Int?,
+            weekday: DayOfWeek
+        ): ResultRow {
+            suspendTransaction {
+                TaskTodosTable.insert {
+                    it[TaskTodosTable.taskId] = taskId
+                    it[TaskTodosTable.weekId] = weekId
+                    it[TaskTodosTable.weekDay] = weekday
+                    it[TaskTodosTable.responsibleId] = responsibleId
+                }
+            }
+
+            return suspendTransaction {
+                TaskTodosTable.selectAll()
+                    .where { TaskTodosTable.taskId eq taskId }
+                    .andWhere { TaskTodosTable.weekId eq weekId }
+                    .andWhere { TaskTodosTable.weekDay eq weekday }
+                    .singleOrNull()!!
+            }
         }
     }
 }

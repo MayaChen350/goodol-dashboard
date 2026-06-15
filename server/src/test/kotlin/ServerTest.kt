@@ -6,10 +6,15 @@ import io.github.mayachen350.goodolServer.data.tables.WeeksTable
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.CategoryDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.CategoryId
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewTaskDTO
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewTodoDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.SomeoneDisplayDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskEditDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewWeekDTO
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.ResponsibleId
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskId
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.TodoDTO
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.WeekId
 import io.github.mayachen350.goodolServer.utils.atEndOfWeek
 import io.github.mayachen350.goodolServer.utils.atStartOfWeek
 import io.github.mayachen350.goodolServer.utils.today
@@ -29,6 +34,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import org.jetbrains.exposed.v1.core.eq
@@ -592,4 +598,306 @@ class ServerTest {
         }
     }
 
+    suspend fun ApplicationTestBuilder.setupTestTodos() {
+        suspendTransaction {
+            TasksTable.insert {
+                it[id] = 10
+                it[name] = "I donmt know"
+            }
+        }
+    }
+
+    @Test
+    fun testFailCreateTodoInThePast() = testApplication {
+        setup()
+        setupTestTodos()
+
+        suspendTransaction {
+            WeeksTable.insert {
+                it[id] = 1u
+                it[startDate] = LocalDate.today().minus(1, DateTimeUnit.WEEK).atStartOfWeek()
+                it[endDate] = LocalDate.today().minus(1, DateTimeUnit.WEEK).atEndOfWeek()
+            }
+        }
+
+        assertEquals(
+            HttpStatusCode.Forbidden,
+            client.post("/weeklyTasking/todos") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    Json.encodeToString(
+                        NewTodoDTO(
+                            TaskId(10),
+                            WeekId(1u),
+                            kotlinx.datetime.DayOfWeek.SATURDAY,
+                            ResponsibleId(1)
+                        )
+                    )
+                )
+            }.status
+        )
+    }
+
+    @Test
+    fun todosCreateTestBunchOfShits() = testApplication {
+        setup()
+        setupTestTodos()
+
+        val weekId = Json.decodeFromString<UInt>(client.get("/weeklyTasking/week/currentWeekId").bodyAsText())
+
+        // responsible must be valid
+        assertEquals(
+            HttpStatusCode.Forbidden,
+            client.post("/weeklyTasking/todos") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    Json.encodeToString(
+                        NewTodoDTO(
+                            TaskId(10),
+                            WeekId(weekId),
+                            kotlinx.datetime.DayOfWeek.SATURDAY,
+                            ResponsibleId(0)
+                        )
+                    )
+                )
+            }.status
+        )
+
+        // task must be valid
+        assertEquals(
+            HttpStatusCode.Forbidden,
+            client.post("/weeklyTasking/todos") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    Json.encodeToString(
+                        NewTodoDTO(
+                            TaskId(0),
+                            WeekId(weekId),
+                            kotlinx.datetime.DayOfWeek.SATURDAY,
+                            ResponsibleId(1)
+                        )
+                    )
+                )
+            }.status
+        )
+
+        // week must be valid
+        assertEquals(
+            HttpStatusCode.Forbidden,
+            client.post("/weeklyTasking/todos") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    Json.encodeToString(
+                        NewTodoDTO(
+                            TaskId(10),
+                            WeekId(0u),
+                            kotlinx.datetime.DayOfWeek.SATURDAY,
+                            ResponsibleId(1)
+                        )
+                    )
+                )
+            }.status
+        )
+
+        // no responsible: allowed
+        assertEquals(
+            HttpStatusCode.Created,
+            client.post("/weeklyTasking/todos") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    Json.encodeToString(
+                        NewTodoDTO(
+                            TaskId(10),
+                            WeekId(weekId),
+                            kotlinx.datetime.DayOfWeek.SATURDAY,
+                            null
+                        )
+                    )
+                )
+            }.also {
+                println(it.bodyAsText())
+            }.status
+        )
+
+        // no conflict allowed
+        assertEquals(
+            HttpStatusCode.Conflict,
+            client.post("/weeklyTasking/todos") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    Json.encodeToString(
+                        NewTodoDTO(
+                            TaskId(10),
+                            WeekId(weekId),
+                            kotlinx.datetime.DayOfWeek.SATURDAY,
+                            ResponsibleId(1)
+                        )
+                    )
+                )
+            }.status
+        )
+    }
+
+    @Test
+    fun testCreateTodoToday() = testApplication {
+        setup()
+        setupTestTodos()
+
+        val weekId = Json.decodeFromString<UInt>(client.get("/weeklyTasking/week/currentWeekId").bodyAsText())
+
+        assertEquals(
+            HttpStatusCode.Created,
+            client.post("/weeklyTasking/todos") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    Json.encodeToString(
+                        NewTodoDTO(
+                            TaskId(10),
+                            WeekId(weekId),
+                            LocalDate.today().dayOfWeek,
+                            ResponsibleId(1)
+                        )
+                    )
+                )
+            }.status
+        )
+
+        // test the get endpoints!
+        val dayDataRaw = client.get("/weeklyTasking/day/todos")
+        assertEquals(HttpStatusCode.OK, dayDataRaw.status)
+        assertEquals(
+            dayDataRaw.bodyAsText(),
+            client.get("/weeklyTasking/day/${LocalDate.today()}/todos").bodyAsText()
+        )
+
+        val dayDataCooked = Json.decodeFromString<List<TodoDTO>>(dayDataRaw.bodyAsText())
+        assertTrue {
+            dayDataCooked.count() == 1 && dayDataCooked.any {
+                it.weekId == weekId && it.taskId == 10
+                        && it.responsibleId == 1
+            }
+        }
+
+        assertTrue {
+            val tomorrowData = Json.decodeFromString<List<TodoDTO>>(
+                client.get("/weeklyTasking/day/${LocalDate.today().plus(1, DateTimeUnit.DAY)}/todos")
+                    .bodyAsText()
+            )
+
+            tomorrowData.none {
+                it.weekId == weekId && it.taskId == 10
+                        && it.responsibleId == 1
+            }
+        }
+
+        assertTrue {
+            val data = Json.decodeFromString<List<TodoDTO>>(
+                client.get("/weeklyTasking/day/todos?ofSomeoneId=2")
+                    .bodyAsText()
+            )
+
+            data.none {
+                it.weekId == weekId && it.taskId == 10
+                        && it.responsibleId == 1
+            }
+        }
+
+        assertTrue {
+            val data = Json.decodeFromString<List<TodoDTO>>(
+                client.get("/weeklyTasking/day/todos?ofSomeoneId=1")
+                    .bodyAsText()
+            )
+
+            data.any {
+                it.weekId == weekId && it.taskId == 10
+                        && it.responsibleId == 1
+            }
+        }
+    }
+
+    @Test
+    fun testCreateTodoNextWeek() = testApplication {
+        setup()
+        setupTestTodos()
+
+        val weekId = Json.decodeFromString<UInt>(client.get("/weeklyTasking/week/currentWeekId").bodyAsText())
+
+        assertEquals(
+            HttpStatusCode.Created,
+            client.post("/weeklyTasking/todos") {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    Json.encodeToString(
+                        NewTodoDTO(
+                            TaskId(10),
+                            WeekId(weekId),
+                            LocalDate.today().atStartOfWeek().dayOfWeek,
+                            ResponsibleId(1)
+                        )
+                    )
+                )
+            }.status
+        )
+
+        // test the get endpoints!
+        val weekDataRaw = client.get("/weeklyTasking/week/todos")
+        assertEquals(HttpStatusCode.OK, weekDataRaw.status)
+        assertEquals(
+            weekDataRaw.bodyAsText(),
+            client.get("/weeklyTasking/week/${weekId}/todos").bodyAsText()
+        )
+
+        val weekDataCooked = Json.decodeFromString<List<TodoDTO>>(weekDataRaw.bodyAsText())
+        assertTrue {
+            weekDataCooked.count() == 1 && weekDataCooked.any {
+                it.weekId == weekId && it.taskId == 10
+                        && it.responsibleId == 1
+            }
+        }
+
+        // week in the future :D
+        suspendTransaction {
+            WeeksTable.insert {
+                it[id] = weekId + 1u
+                it[startDate] = LocalDate.today().plus(1, DateTimeUnit.WEEK).atStartOfWeek()
+                it[endDate] = LocalDate.today().plus(1, DateTimeUnit.WEEK).atEndOfWeek()
+            }
+        }
+
+        assertTrue {
+            val nextWeekData = Json.decodeFromString<List<TodoDTO>>(
+                client.get("/weeklyTasking/week/${weekId + 1u}/todos")
+                    .bodyAsText()
+            )
+
+            nextWeekData.none {
+                it.weekId == weekId && it.taskId == 10
+                        && it.responsibleId == 1
+            }
+        }
+
+        assertTrue {
+            val data = Json.decodeFromString<List<TodoDTO>>(
+                client.get("/weeklyTasking/week/todos?ofSomeoneId=2")
+                    .bodyAsText()
+            )
+
+            data.none {
+                it.weekId == weekId && it.taskId == 10
+                        && it.responsibleId == 1
+            }
+        }
+
+        assertTrue {
+            val data = Json.decodeFromString<List<TodoDTO>>(
+                client.get("/weeklyTasking/week/todos?ofSomeoneId=1")
+                    .bodyAsText()
+            )
+
+            data.any {
+                it.weekId == weekId && it.taskId == 10
+                        && it.responsibleId == 1
+            }
+        }
+    }
 }

@@ -1,8 +1,12 @@
 package io.github.mayachen350.goodolServer.feat.weeklyTasking
 
+import arrow.core.getOrElse
+import io.github.mayachen350.goodolServer.data.services.WeeklyTaskingService
 import io.github.mayachen350.goodolServer.utils.today
+import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
 import io.ktor.server.resources.get
+import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.RoutingContext
 import kotlinx.datetime.LocalDate
@@ -21,7 +25,17 @@ private class Days {
 
 fun Route.includeDayRoutes() {
     suspend fun RoutingContext.getTodos(date: LocalDate, responsibleId: ResponsibleId?) {
+        // I'm not sure if there should be validation for a query parameter,
+        // but maybe it's better than just returning an empty array with an OK response?
+        val id: Int? = responsibleId?.validate()?.getOrElse {
+            return call.respond(HttpStatusCode.NotFound, "Invalid responsible id.")
+        }
 
+        call.respond<List<TodoDTO>>(
+            HttpStatusCode.OK,
+            WeeklyTaskingService.TaskTodos.getAllThisDay(date, id)
+                .map { TodoDTO.fromResultRow(it) }
+        )
     }
 
     // tasks to do today

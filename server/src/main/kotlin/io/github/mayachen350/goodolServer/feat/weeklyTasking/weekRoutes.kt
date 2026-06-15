@@ -57,7 +57,16 @@ fun Route.includeWeekRoutes() {
     }
 
     suspend fun RoutingContext.getTodos(weekId: UInt, ofSomeoneId: ResponsibleId?) {
-        call.respond(HttpStatusCode.OK, "yes yes yes")
+        // probably better than just returning an empty array with an OK response
+        val id: Int? = ofSomeoneId?.validate()?.getOrElse {
+            return call.respond(HttpStatusCode.NotFound, "Invalid responsible id.")
+        }
+
+        call.respond<List<TodoDTO>>(
+            HttpStatusCode.OK,
+            WeeklyTaskingService.TaskTodos.getAllThisWeek(weekId, id)
+                .map { TodoDTO.fromResultRow(it) }
+        )
     }
 
     // tasks to do this week

@@ -21,8 +21,8 @@ Goal is to informatize a "system" that was literally placing dots on plasticized
         - [X] Remove a task
         - [X] Get all tasks
         - [ ] Assign yourself task (check: no tasks assigned before today)
-        - [ ] Get all tasks of a day (with optional person) (default today)
-        - [ ] Get all tasks of a week (with optional person) (default today)
+        - [X] Get all tasks of a day (with optional person) (default today)
+        - [X] Get all tasks of a week (with optional person) (default today)
         - [ ] Mark a task as completed
 - [X] People
     - [X] Edit fields

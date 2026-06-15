@@ -1,7 +1,6 @@
 package io.github.mayachen350.goodolServer.feat.weeklyTasking
 
 import arrow.core.getOrElse
-import arrow.core.right
 import io.github.mayachen350.goodolServer.data.services.WeeklyTaskingService
 import io.github.mayachen350.goodolServer.data.tables.ResponsiblesTable
 import io.ktor.http.HttpStatusCode

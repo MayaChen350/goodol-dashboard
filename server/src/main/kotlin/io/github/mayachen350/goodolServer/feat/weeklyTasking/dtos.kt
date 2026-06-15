@@ -1,14 +1,17 @@
 package io.github.mayachen350.goodolServer.feat.weeklyTasking
 
+import io.github.mayachen350.goodolServer.data.tables.TaskTodosTable
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewTaskDTO
 import io.ktor.openapi.*
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
+import org.jetbrains.exposed.v1.core.ResultRow
 
 @Serializable
 @JsonSchema.Title("NewTask")
 data class NewTaskDTO(val name: String, val categoryId: CategoryId?) {
-    constructor(name: String, categoryId: Int): this(name, CategoryId(categoryId))
+    constructor(name: String, categoryId: Int) : this(name, CategoryId(categoryId))
 }
 
 @Serializable
@@ -17,8 +20,8 @@ data class TaskDTO(val id: TaskId, val name: String, val categoryId: CategoryId?
 
 @Serializable
 @JsonSchema.Title("TaskEdit")
-data class TaskEditDTO(val name: String, val categoryId: CategoryId?)  {
-    constructor(name: String, categoryId: Int): this(name, CategoryId(categoryId))
+data class TaskEditDTO(val name: String, val categoryId: CategoryId?) {
+    constructor(name: String, categoryId: Int) : this(name, CategoryId(categoryId))
 }
 
 @Serializable
@@ -42,22 +45,35 @@ data class CategoryDTO(val id: CategoryId, val name: String)
 data class NewTodoDTO(
     val taskId: TaskId,
     val weekId: WeekId,
+    val weekDay: DayOfWeek,
     val responsibleId: ResponsibleId?
 )
 
 @Serializable
 @JsonSchema.Title("Todo")
 data class TodoDTO(
-    val todoId: TaskTodoId,
+    val todoId: Int, // since this is returned data, one could simply assume it's always valid IDs (probably...)
     val taskId: Int,
     val weekId: UInt,
+    val weekDay: DayOfWeek,
     val responsibleId: Int?,
     val isCompleted: Boolean
-)
+) {
+    companion object {
+        fun fromResultRow(it: ResultRow) = TodoDTO(
+            it[TaskTodosTable.id].value,
+            it[TaskTodosTable.taskId].value,
+            it[TaskTodosTable.weekId],
+            it[TaskTodosTable.weekDay],
+            it[TaskTodosTable.responsibleId]?.value,
+            it[TaskTodosTable.isCompleted]
+        )
+    }
+}
 
 @Serializable
 @JsonSchema.Title("AssignTodo")
 data class AssignTodoDTO(
-    val todoId: Int,
-    val responsibleId: Int?,
+    val todoId: TaskTodoId,
+    val responsibleId: ResponsibleId?,
 )

@@ -10,5 +10,7 @@ object HasChildrenError
 
 object NotFound
 
+object InvalidError
+
 // probably will just use Unit for now
 //object Success
