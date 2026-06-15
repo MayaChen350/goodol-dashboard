@@ -8,7 +8,7 @@ import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewTaskDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.SomeoneDisplayDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskEditDTO
-import io.github.mayachen350.goodolServer.feat.weeklyTasking.WeekDTO
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewWeekDTO
 import io.github.mayachen350.goodolServer.utils.atEndOfWeek
 import io.github.mayachen350.goodolServer.utils.atStartOfWeek
 import io.github.mayachen350.goodolServer.utils.today
@@ -80,7 +80,7 @@ class ServerTest {
 
             val response = client.post("/weeklyTasking/week") {
                 contentType(ContentType.Application.Json)
-                setBody(Json.encodeToJsonElement(WeekDTO(weekId, LocalDate.today())).toString())
+                setBody(Json.encodeToJsonElement(NewWeekDTO(weekId, LocalDate.today())).toString())
             }
 
             assertEquals(HttpStatusCode.Created, response.status)
@@ -95,14 +95,14 @@ class ServerTest {
 
             client.post("/weeklyTasking/week") {
                 contentType(ContentType.Application.Json)
-                setBody(Json.encodeToJsonElement(WeekDTO(2u, LocalDate.today())).toString())
+                setBody(Json.encodeToJsonElement(NewWeekDTO(2u, LocalDate.today())).toString())
             }
 
             assertEquals(
                 HttpStatusCode.Conflict,
                 client.post("/weeklyTasking/week") {
                     contentType(ContentType.Application.Json)
-                    setBody(Json.encodeToJsonElement(WeekDTO(10u, LocalDate.today())).toString())
+                    setBody(Json.encodeToJsonElement(NewWeekDTO(10u, LocalDate.today())).toString())
                 }.status
             )
         }
@@ -115,7 +115,7 @@ class ServerTest {
                 HttpStatusCode.Forbidden,
                 client.post("/weeklyTasking/week") {
                     contentType(ContentType.Application.Json)
-                    setBody(Json.encodeToJsonElement(WeekDTO(10u, LocalDate(2025, 2, 10))).toString())
+                    setBody(Json.encodeToJsonElement(NewWeekDTO(10u, LocalDate(2025, 2, 10))).toString())
                 }.status
             )
 

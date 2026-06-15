@@ -12,15 +12,15 @@ private class Days {
     @Resource("{date}")
     class Date(val parent: Days = Days(), val date: LocalDate) {
         @Resource("todos")
-        class Todos(val parent: Date, val ofSomeoneId: Int? = null)
+        class Todos(val parent: Date, val ofSomeoneId: ResponsibleId? = null)
     }
 
     @Resource("todos")
-    class Todos(val parent: Days = Days(), val ofSomeoneId: Int? = null)
+    class Todos(val parent: Days = Days(), val ofSomeoneId: ResponsibleId? = null)
 }
 
 fun Route.includeDayRoutes() {
-    suspend fun RoutingContext.getTodos(date: LocalDate, ofSomeoneId: Int?) {
+    suspend fun RoutingContext.getTodos(date: LocalDate, responsibleId: ResponsibleId?) {
 
     }
 

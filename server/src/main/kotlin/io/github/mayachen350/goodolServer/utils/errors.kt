@@ -8,5 +8,7 @@ object DatabaseConflictError
 
 object HasChildrenError
 
+object NotFound
+
 // probably will just use Unit for now
 //object Success

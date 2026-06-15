@@ -1,5 +1,7 @@
 package io.github.mayachen350.goodolServer.feat.weeklyTasking
 
+import arrow.core.getOrElse
+import arrow.core.right
 import io.github.mayachen350.goodolServer.data.services.WeeklyTaskingService
 import io.github.mayachen350.goodolServer.data.tables.ResponsiblesTable
 import io.ktor.http.HttpStatusCode
@@ -14,7 +16,7 @@ import io.ktor.server.routing.RoutingContext
 @Resource("/people")
 private class People {
     @Resource("{id}")
-    class Id(val parent: People = People(), val id: Int) {
+    class Id(val parent: People = People(), val id: ResponsibleId) {
         @Resource("color")
         class Color(val parent: Id) {
 
@@ -44,24 +46,24 @@ fun Route.includePeopleRoutes() {
     get<People> {
         call.respond<List<SomeoneDisplayDTO>>(WeeklyTaskingService.People.getAllPeople().map {
             with(ResponsiblesTable) {
-                SomeoneDisplayDTO(it[id].value, it[name], it[chosenColorRGB])
+                SomeoneDisplayDTO(ResponsibleId(it[id].value), it[name], it[chosenColorRGB])
             }
         })
     }
 
     put<People.Id.Rename> {
-        if (!WeeklyTaskingService.People.existsBId(it.parent.id)) {
+        val id = it.parent.id.validate().getOrElse {
             return@put call.respond(HttpStatusCode.NotFound, "Invalid responsible id.")
         }
 
         val newName = call.receive<String>()
 
-        WeeklyTaskingService.People.rename(it.parent.id, newName)
+        WeeklyTaskingService.People.rename(id, newName)
         call.respond(HttpStatusCode.OK, "New name: $newName")
     }
 
-    suspend fun RoutingContext.editColor(id: Int, colorRGB: UInt) {
-        if (!WeeklyTaskingService.People.existsBId(id)) {
+    suspend fun RoutingContext.editColor(someoneId: ResponsibleId, colorRGB: UInt) {
+        val id = someoneId.validate().getOrElse {
             return call.respond(HttpStatusCode.NotFound, "Invalid responsible id.")
         }
 
@@ -94,6 +96,5 @@ fun Route.includePeopleRoutes() {
         }
 
         editColor(it.parent.parent.parent.id, colorRGB)
-
     }
 }

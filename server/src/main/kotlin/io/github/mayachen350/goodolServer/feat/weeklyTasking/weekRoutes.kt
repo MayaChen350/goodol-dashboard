@@ -1,5 +1,6 @@
 package io.github.mayachen350.goodolServer.feat.weeklyTasking
 
+import arrow.core.getOrElse
 import io.github.mayachen350.goodolServer.data.services.WeeklyTaskingService
 import io.github.mayachen350.goodolServer.data.tables.WeeksTable
 import io.github.mayachen350.goodolServer.utils.today
@@ -22,18 +23,18 @@ private class Weeks {
     class CurrentWeekId(val parent: Weeks = Weeks())
 
     @Resource("{id}")
-    class Id(val parent: Weeks = Weeks(), val id: UInt) {
+    class Id(val parent: Weeks = Weeks(), val id: WeekId) {
         @Resource("todos")
-        class Todos(val parent: Id, val ofSomeoneId: Int? = null)
+        class Todos(val parent: Id, val ofSomeoneId: ResponsibleId? = null)
     }
 
     @Resource("todos")
-    class Todos(val parent: Weeks = Weeks(), val ofSomeoneId: Int? = null)
+    class Todos(val parent: Weeks = Weeks(), val ofSomeoneId: ResponsibleId? = null)
 }
 
 fun Route.includeWeekRoutes() {
     post<Weeks> {
-        val weekData: WeekDTO = call.receive()
+        val weekData: NewWeekDTO = call.receive()
 
         if (weekData.date < LocalDate.today()) {
             call.respond(HttpStatusCode.Forbidden, "Cannot create a week in the past!!")
@@ -55,7 +56,7 @@ fun Route.includeWeekRoutes() {
         call.respond<UInt>(currentWeekId())
     }
 
-    suspend fun RoutingContext.getTodos(weekId: UInt, ofSomeoneId: Int?) {
+    suspend fun RoutingContext.getTodos(weekId: UInt, ofSomeoneId: ResponsibleId?) {
         call.respond(HttpStatusCode.OK, "yes yes yes")
     }
 
@@ -65,8 +66,10 @@ fun Route.includeWeekRoutes() {
     }
 
     get<Weeks.Id.Todos> {
-        getTodos(it.parent.id, it.ofSomeoneId)
+        val id: UInt = it.parent.id.validate().getOrElse {
+            return@get call.respond(HttpStatusCode.NotFound, "Invalid week id.")
+        }
 
-
+        getTodos(id, it.ofSomeoneId)
     }
 }

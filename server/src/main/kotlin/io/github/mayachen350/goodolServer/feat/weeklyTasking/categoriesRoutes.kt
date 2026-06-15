@@ -1,5 +1,6 @@
 package io.github.mayachen350.goodolServer.feat.weeklyTasking
 
+import arrow.core.getOrElse
 import io.github.mayachen350.goodolServer.data.services.WeeklyTaskingService
 import io.github.mayachen350.goodolServer.data.tables.CategoriesTable
 import io.ktor.http.HttpStatusCode
@@ -16,7 +17,7 @@ import io.ktor.utils.io.ExperimentalKtorApi
 @Resource("/categories")
 private class Categories {
     @Resource("{id}")
-    class Id(val parent: Categories = Categories(), val id: Int)
+    class Id(val parent: Categories = Categories(), val id: CategoryId)
 
     @Resource("{name}")
     class Name(val parent: Categories = Categories(), val name: String)
@@ -24,7 +25,7 @@ private class Categories {
     @Resource("rename")
     class Rename(val parent: Categories = Categories()) {
         @Resource("{id}")
-        class Id(val parent: Rename = Rename(), val id: Int)
+        class Id(val parent: Rename = Rename(), val id: CategoryId)
     }
 }
 
@@ -32,7 +33,7 @@ private class Categories {
 fun Route.includeCategoriesRoutes() {
     get<Categories> {
         call.respond<List<CategoryDTO>>(WeeklyTaskingService.Category.getAll().map {
-            CategoryDTO(it[CategoriesTable.id].value, it[CategoriesTable.name])
+            CategoryDTO(CategoryId(it[CategoriesTable.id].value), it[CategoriesTable.name])
         })
     }
 
@@ -40,14 +41,14 @@ fun Route.includeCategoriesRoutes() {
         call.respond<CategoryDTO>(
             HttpStatusCode.Created,
             WeeklyTaskingService.Category.createNew(it.name).let {
-                CategoryDTO(it[CategoriesTable.id].value, it[CategoriesTable.name])
+                CategoryDTO(CategoryId(it[CategoriesTable.id].value), it[CategoriesTable.name])
             }
         )
     }
 
     put<Categories.Rename.Id> {
-        if (!WeeklyTaskingService.Category.existsBId(it.id)) {
-            call.respond(HttpStatusCode.NotFound, "No category with that id.")
+        val id = it.id.validate().getOrElse {
+            return@put call.respond(HttpStatusCode.NotFound, "No category with that id.")
         }
 
         val categoryWithNewName = CategoryDTO(it.id, call.receive<String>())
@@ -58,17 +59,18 @@ fun Route.includeCategoriesRoutes() {
 
         call.respond<CategoryDTO>(
             HttpStatusCode.OK,
-            WeeklyTaskingService.Category.rename(it.id, categoryWithNewName.name).let {
-                CategoryDTO(it[CategoriesTable.id].value, it[CategoriesTable.name])
+            WeeklyTaskingService.Category.rename(id, categoryWithNewName.name).let {
+                CategoryDTO(CategoryId(it[CategoriesTable.id].value), it[CategoriesTable.name])
             }
         )
     }
 
     delete<Categories.Id> {
-        if (!WeeklyTaskingService.Category.existsBId(it.id))
+        val id = it.id.validate().getOrElse {
             return@delete call.respond(HttpStatusCode.NotFound, "No category with that id.")
+        }
 
-        val result = WeeklyTaskingService.Category.delete(it.id)
+        val result = WeeklyTaskingService.Category.delete(id)
         if (result.isLeft())
             return@delete call.respond(HttpStatusCode.Forbidden, "The category still contains tasks!")
 

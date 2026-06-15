@@ -1,5 +1,6 @@
 package io.github.mayachen350.goodolServer.feat.weeklyTasking
 
+import arrow.core.getOrElse
 import io.github.mayachen350.goodolServer.data.services.WeeklyTaskingService
 import io.github.mayachen350.goodolServer.data.tables.TasksTable
 import io.ktor.http.HttpStatusCode
@@ -18,12 +19,12 @@ private class Tasks {
     class New(val parent: Tasks = Tasks())
 
     @Resource("{id}")
-    class Id(val parent: Tasks = Tasks(), val id: Int)
+    class Id(val parent: Tasks = Tasks(), val id: TaskId)
 
     @Resource("edit")
     class Edit(val parent: Tasks = Tasks()) {
         @Resource("{id}")
-        class Id(val parent: Edit = Edit(), val id: Int)
+        class Id(val parent: Edit = Edit(), val id: TaskId)
     }
 
     @Resource("{name}")
@@ -32,8 +33,12 @@ private class Tasks {
 
 fun Route.includeTasksRoutes() {
     get<Tasks.Id> {
-        val task: TaskDTO? = WeeklyTaskingService.Tasks.getTaskById(it.id)?.let {
-            TaskDTO(it[TasksTable.id].value, it[TasksTable.name], it[TasksTable.categoryId]?.value)
+        val task: TaskDTO? = WeeklyTaskingService.Tasks.getTaskById(it.id.value)?.let {
+            TaskDTO(
+                TaskId(it[TasksTable.id].value), it[TasksTable.name],
+                it[TasksTable.categoryId]?.value?.let {
+                    CategoryId(it)
+                })
         }
 
         if (task == null) {
@@ -45,13 +50,21 @@ fun Route.includeTasksRoutes() {
     }
     get<Tasks> {
         call.respond(WeeklyTaskingService.Tasks.getAllTasks().map {
-            TaskDTO(it[TasksTable.id].value, it[TasksTable.name], it[TasksTable.categoryId]?.value)
+            TaskDTO(
+                TaskId(it[TasksTable.id].value), it[TasksTable.name],
+                it[TasksTable.categoryId]?.value?.let {
+                    CategoryId(it)
+                })
         })
     }
     post<Tasks> {
         with(call.receive<NewTaskDTO>()) {
             val newTask: TaskDTO = WeeklyTaskingService.Tasks.createNewTask(this).let {
-                TaskDTO(it[TasksTable.id].value, it[TasksTable.name], it[TasksTable.categoryId]?.value)
+                TaskDTO(
+                    TaskId(it[TasksTable.id].value), it[TasksTable.name],
+                    it[TasksTable.categoryId]?.value?.let {
+                        CategoryId(it)
+                    })
             }
             call.respond(HttpStatusCode.Created, newTask)
         }
@@ -68,19 +81,17 @@ fun Route.includeTasksRoutes() {
     }
 
     put<Tasks.Edit.Id> {
-        if (!WeeklyTaskingService.Tasks.existsById(it.id)) {
-            call.respond(HttpStatusCode.NotFound, "No task with that id.")
-            return@put;
+        val id = it.id.validate().getOrElse {
+            return@put call.respond(HttpStatusCode.NotFound, "No task with that id.")
         }
 
         val data: TaskEditDTO = call.receive<TaskEditDTO>()
 
-        if (data.categoryId != null && !WeeklyTaskingService.Category.existsBId(data.categoryId)) {
-            call.respond(HttpStatusCode.NotFound, "Invalid category. No category with that id.")
-            return@put;
+        val categoryId = data.categoryId?.validate()?.getOrElse {
+            return@put call.respond(HttpStatusCode.NotFound, "Invalid category. No category with that id.")
         }
 
-        val result: EditedTaskDTO = WeeklyTaskingService.Tasks.editTask(it.id, data)
+        val result: EditedTaskDTO = WeeklyTaskingService.Tasks.editTask(id, data)
         call.respond(HttpStatusCode.OK, result)
     }
 }

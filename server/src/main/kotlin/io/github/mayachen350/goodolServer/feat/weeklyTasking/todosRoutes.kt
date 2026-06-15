@@ -1,9 +1,12 @@
 package io.github.mayachen350.goodolServer.feat.weeklyTasking
 
+import arrow.core.getOrElse
+import io.ktor.http.HttpStatusCode
 import io.ktor.resources.Resource
 import io.ktor.server.request.receive
 import io.ktor.server.resources.get
 import io.ktor.server.resources.post
+import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 
 @Resource("todos")
@@ -14,7 +17,7 @@ private class Todos {
     @Resource("complete")
     class Complete(val parent: Todos = Todos()) {
         @Resource("{id}")
-        class Id(val parent: Complete = Complete(), val id: Int)
+        class Id(val parent: Complete = Complete(), val id: TaskTodoId)
     }
 }
 
@@ -26,6 +29,8 @@ fun Route.includeTodosRoutes() {
         val assignTodoData = call.receive<AssignTodoDTO>()
     }
     post<Todos.Complete.Id> {
-
+        val id = it.id.validate().getOrElse {
+            return@post call.respond(HttpStatusCode.NotFound, "Invalid TaskTodo id. Todo not found.")
+        }
     }
 }

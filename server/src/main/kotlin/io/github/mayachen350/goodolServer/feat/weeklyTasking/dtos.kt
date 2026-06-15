@@ -6,44 +6,44 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @JsonSchema.Title("NewTask")
-data class NewTaskDTO(val name: String, val categoryId: Int?)
+data class NewTaskDTO(val name: String, val categoryId: CategoryId?)
 
 @Serializable
 @JsonSchema.Title("Task")
-data class TaskDTO(val id: Int, val name: String, val categoryId: Int?)
+data class TaskDTO(val id: TaskId, val name: String, val categoryId: CategoryId?)
 
 @Serializable
 @JsonSchema.Title("TaskEdit")
-data class TaskEditDTO(val name: String, val categoryId: Int?)
+data class TaskEditDTO(val name: String, val categoryId: CategoryId?)
 
 @Serializable
 @JsonSchema.Title("EditedTask")
-data class EditedTaskDTO(val id: Int, val name: String, val categoryId: Int?)
+data class EditedTaskDTO(val id: TaskId, val name: String, val categoryId: CategoryId?)
 
 @Serializable
 @JsonSchema.Title("Someone")
-data class SomeoneDisplayDTO(val id: Int, val name: String, val chosenColor: UInt)
+data class SomeoneDisplayDTO(val id: ResponsibleId, val name: String, val chosenColor: UInt)
 
 @Serializable
-@JsonSchema.Title("Week")
-data class WeekDTO(val weekId: UInt, val date: LocalDate)
+@JsonSchema.Title("NewWeek")
+data class NewWeekDTO(val weekId: UInt, val date: LocalDate)
 
 @Serializable
 @JsonSchema.Title("Category")
-data class CategoryDTO(val id: Int, val name: String)
+data class CategoryDTO(val id: CategoryId, val name: String)
 
 @Serializable
 @JsonSchema.Title("NewTodo")
 data class NewTodoDTO(
-    val taskId: Int,
-    val weekId: UInt,
-    val responsibleId: Int?
+    val taskId: TaskId,
+    val weekId: WeekId,
+    val responsibleId: ResponsibleId?
 )
 
 @Serializable
 @JsonSchema.Title("Todo")
 data class TodoDTO(
-    val todoId: Int,
+    val todoId: TaskTodoId,
     val taskId: Int,
     val weekId: UInt,
     val responsibleId: Int?,
