@@ -4,6 +4,7 @@ import io.github.mayachen350.goodolServer.data.tables.CategoriesTable
 import io.github.mayachen350.goodolServer.data.tables.TasksTable
 import io.github.mayachen350.goodolServer.data.tables.WeeksTable
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.CategoryDTO
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.CategoryId
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewTaskDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.SomeoneDisplayDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskDTO
@@ -357,7 +358,7 @@ class ServerTest {
         )
 
         val newCategoryData = Json.decodeFromString<TaskDTO>(client.get("/weeklyTasking/tasks/2").bodyAsText())
-        assertTrue { newCategoryData.categoryId == 2 }
+        assertTrue { newCategoryData.categoryId?.value == 2 }
 
         // test change all
         assertEquals(
@@ -409,7 +410,7 @@ class ServerTest {
 
         val testId: Int =
             Json.decodeFromString<CategoryDTO>(client.post("/weeklyTasking/categories/Eucli").bodyAsText())
-                .id
+                .id.value
 
         // test not modified (I included that for some reason, but that should most likely be done to the client)
         assertEquals(
@@ -421,7 +422,7 @@ class ServerTest {
 
         // actual modification test
         assertEquals(
-            CategoryDTO(testId, "Euclid"),
+            CategoryDTO(CategoryId(testId), "Euclid"),
             Json.decodeFromString<CategoryDTO>(client.put("/weeklyTasking/categories/rename/${testId}") {
                 setBody("Euclid")
             }.bodyAsText())
@@ -483,7 +484,7 @@ class ServerTest {
 
         assertFalse {
             Json.decodeFromString<List<CategoryDTO>>(client.get("/weeklyTasking/categories").bodyAsText()).any {
-                it.id == 20
+                it.id.value == 20
             }
         }
     }
@@ -513,7 +514,7 @@ class ServerTest {
 
         assertTrue {
             Json.decodeFromString<List<SomeoneDisplayDTO>>(client.get("/weeklyTasking/people").bodyAsText()).any {
-                it.id == 1 && it.name == "Giratuna"
+                it.id.value == 1 && it.name == "Giratuna"
             }
         }
     }
@@ -586,7 +587,7 @@ class ServerTest {
 
         assertTrue {
             Json.decodeFromString<List<SomeoneDisplayDTO>>(client.get("/weeklyTasking/people").bodyAsText()).any {
-                it.id == 1 && it.chosenColor == 0xFAFAu
+                it.id.value == 1 && it.chosenColor == 0xFAFAu
             }
         }
     }

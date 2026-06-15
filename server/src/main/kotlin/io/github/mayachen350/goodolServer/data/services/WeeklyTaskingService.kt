@@ -262,7 +262,7 @@ object WeeklyTaskingService {
                 TasksTable.id eq id
             }) {
                 it[name] = editDTO.name
-                it[categoryId] = editDTO.categoryId!!.value
+                it[categoryId] = editDTO.categoryId?.value
             }
 
             // update returning does not currently work in MariaDB
