@@ -6,7 +6,7 @@ import org.flywaydb.core.Flyway
 import java.util.UUID
 
 class H2DbConnection(val randomUUID: UUID): DbConnection {
-    override val URL: String = "r2dbc:h2:mem:///${randomUUID};DB_CLOSE_DELAY=-1"
+    override val URL: String = "r2dbc:h2:mem:///${randomUUID};DB_CLOSE_DELAY=-1;MODE=MySQL"
     override val USER: String = "root"
     override val PASSWORD: String = ""
 }

@@ -2,6 +2,7 @@ package io.github.mayachen350.goodolServer.feat.weeklyTasking
 
 import arrow.core.getOrElse
 import io.github.mayachen350.goodolServer.data.services.WeeklyTaskingService
+import io.github.mayachen350.goodolServer.data.tables.TasksTable
 import io.github.mayachen350.goodolServer.data.tables.WeeksTable
 import io.github.mayachen350.goodolServer.utils.atEndOfWeek
 import io.github.mayachen350.goodolServer.utils.atStartOfWeek
@@ -12,11 +13,15 @@ import io.ktor.server.request.receive
 import io.ktor.server.resources.post
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.resources.get
 import kotlinx.datetime.LocalDate
 import org.jetbrains.exposed.v1.core.ResultRow
 
 @Resource("todos")
 private class Todos {
+    @Resource("{id}")
+    class Id(val parent: Todos = Todos(), val id: TaskTodoId)
+
     @Resource("assign")
     class Assign(val parent: Todos = Todos())
 
@@ -28,6 +33,17 @@ private class Todos {
 }
 
 fun Route.includeTodosRoutes() {
+    get<Todos.Id> {
+        val todo: TodoDTO? = WeeklyTaskingService.TaskTodos.getById(it.id.value)?.let(TodoDTO::fromResultRow)
+
+        if (todo == null) {
+            call.respond(HttpStatusCode.NotFound, "Todo not found")
+            return@get
+        }
+
+        call.respond<TodoDTO>(todo)
+    }
+
     post<Todos> {
         val taskId: Int
         val week: ResultRow
@@ -74,10 +90,22 @@ fun Route.includeTodosRoutes() {
     }
     post<Todos.Assign> {
         val assignTodoData = call.receive<AssignTodoDTO>()
+
+        val todoId = assignTodoData.todoId.validate().getOrElse {
+            return@post call.respond(HttpStatusCode.Forbidden, "Invalid TaskTodo id. Todo not found.")
+        }
+        val responsibleId: Int? = assignTodoData.responsibleId?.validate()?.getOrElse {
+            return@post call.respond(HttpStatusCode.Forbidden, "Invalid person id.")
+        }
+
+        WeeklyTaskingService.TaskTodos.assign(todoId, responsibleId)
+        call.respond(HttpStatusCode.OK, if (responsibleId !== null) "Task assigned!" else "Task unassigned!")
     }
     post<Todos.Complete.Id> {
         val id = it.id.validate().getOrElse {
             return@post call.respond(HttpStatusCode.NotFound, "Invalid TaskTodo id. Todo not found.")
         }
+
+        call.respond(HttpStatusCode.OK, WeeklyTaskingService.TaskTodos.toggleCompletion(id))
     }
 }

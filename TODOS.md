@@ -8,22 +8,22 @@ Goal is to informatize a "system" that was literally placing dots on plasticized
 
 ### Backend
 
-- [ ] Tasks
-    - [ ] Management (service)
+- [X] Tasks
+    - [X] Management (service)
         - [X] Add new tasks
         - [X] Edit tasks
         - [X] Remove tasks
-        - [ ] Assign tasks
-        - [ ] Mark a task as completed
-    - [ ] Endpoints
+        - [X] Assign tasks
+        - [X] Mark a task as completed
+    - [X] Endpoints
         - [X] Add a new task
         - [X] Edit a task
         - [X] Remove a task
         - [X] Get all tasks
-        - [ ] Assign yourself task (check: no tasks assigned before today)
+        - [X] Assign yourself task (check: no tasks assigned before today)
         - [X] Get all tasks of a day (with optional person) (default today)
         - [X] Get all tasks of a week (with optional person) (default today)
-        - [ ] Mark a task as completed
+        - [X] Mark a task as completed
 - [X] People
     - [X] Edit fields
     - [X] Get them

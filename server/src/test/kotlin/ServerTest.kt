@@ -1,8 +1,10 @@
 package io.github.mayachen350.goodolServer
 
 import io.github.mayachen350.goodolServer.data.tables.CategoriesTable
+import io.github.mayachen350.goodolServer.data.tables.TaskTodosTable
 import io.github.mayachen350.goodolServer.data.tables.TasksTable
 import io.github.mayachen350.goodolServer.data.tables.WeeksTable
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.AssignTodoDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.CategoryDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.CategoryId
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewTaskDTO
@@ -13,6 +15,7 @@ import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskEditDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewWeekDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.ResponsibleId
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskId
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskTodoId
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.TodoDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.WeekId
 import io.github.mayachen350.goodolServer.utils.atEndOfWeek
@@ -900,4 +903,91 @@ class ServerTest {
             }
         }
     }
+
+    @Test
+    fun testAssignTask() = testApplication {
+        setup()
+        setupTestTodos()
+
+        val weekId = Json.decodeFromString<UInt>(client.get("/weeklyTasking/week/currentWeekId").bodyAsText())
+
+        suspendTransaction {
+            TaskTodosTable.insert {
+                it[id] = 1
+                it[taskId] = 10
+                it[this.weekId] = weekId
+                it[weekDay] = LocalDate.today().dayOfWeek
+                it[responsibleId] = null
+            }
+        }
+
+        client.post("/weeklyTasking/todos/assign") {
+            contentType(ContentType.Application.Json)
+            setBody(
+                Json.encodeToString(
+                    AssignTodoDTO(
+                        TaskTodoId(1),
+                        ResponsibleId(1)
+                    )
+                )
+            )
+        }
+
+        assertTrue {
+            Json.decodeFromString<TodoDTO>(client.get("/weeklyTasking/todos/1").bodyAsText()).responsibleId == 1
+        }
+
+        // unassign
+        client.post("/weeklyTasking/todos/assign") {
+            contentType(ContentType.Application.Json)
+            setBody(
+                Json.encodeToString(
+                    AssignTodoDTO(
+                        TaskTodoId(1),
+                        null
+                    )
+                )
+            )
+        }
+
+        assertTrue {
+            Json.decodeFromString<TodoDTO>(client.get("/weeklyTasking/todos/1").bodyAsText()).responsibleId == null
+        }
+    }
+
+    @Test
+    fun testCompleteTask() = testApplication {
+        setup()
+        setupTestTodos()
+
+        val weekId = Json.decodeFromString<UInt>(client.get("/weeklyTasking/week/currentWeekId").bodyAsText())
+
+        suspendTransaction {
+            TaskTodosTable.insert {
+                it[id] = 1
+                it[taskId] = 10
+                it[this.weekId] = weekId
+                it[weekDay] = LocalDate.today().dayOfWeek
+                it[responsibleId] = null
+            }
+        }
+
+        assertTrue {
+            Json.decodeFromString<Boolean>(client.post("/weeklyTasking/todos/complete/1").bodyAsText().also(::println))
+        }
+
+        assertFalse {
+            Json.decodeFromString<Boolean>(client.post("/weeklyTasking/todos/complete/1").bodyAsText())
+        }
+
+        // two times because why not
+        assertTrue {
+            Json.decodeFromString<Boolean>(client.post("/weeklyTasking/todos/complete/1").bodyAsText())
+        }
+
+        assertFalse {
+            Json.decodeFromString<Boolean>(client.post("/weeklyTasking/todos/complete/1").bodyAsText())
+        }
+    }
+
 }

@@ -17,6 +17,7 @@ import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewTodoDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskEditDTO
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskId
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.NewWeekDTO
+import io.github.mayachen350.goodolServer.feat.weeklyTasking.TaskTodoId
 import io.github.mayachen350.goodolServer.feat.weeklyTasking.WeekId
 import io.github.mayachen350.goodolServer.utils.HasChildrenError
 import io.github.mayachen350.goodolServer.utils.atEndOfWeek
@@ -37,6 +38,7 @@ import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.select
 import org.jetbrains.exposed.v1.r2dbc.selectAll
+import org.jetbrains.exposed.v1.r2dbc.transactions.TransactionManager
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import org.jetbrains.exposed.v1.r2dbc.update
 
@@ -325,6 +327,12 @@ object WeeklyTaskingService {
                 .toList().any()
         }
 
+        suspend fun getById(id: Int): ResultRow? = suspendTransaction {
+            TaskTodosTable.selectAll()
+                .where { TaskTodosTable.id eq id }
+                .singleOrNull()
+        }
+
         suspend fun getAllThisDay(date: LocalDate, ofSomeoneId: Int? = null): List<ResultRow> =
             suspendTransaction(database) {
                 val query = TaskTodosTable
@@ -375,6 +383,33 @@ object WeeklyTaskingService {
                     .andWhere { TaskTodosTable.weekDay eq weekday }
                     .singleOrNull()!!
             }
+        }
+
+        suspend fun assign(todoId: Int, someoneId: Int?) {
+            suspendTransaction {
+                TaskTodosTable.update(where = {
+                    TaskTodosTable.id eq todoId
+                }) {
+                    it[TaskTodosTable.responsibleId] = someoneId
+                }
+            }
+        }
+
+        suspend fun toggleCompletion(todoId: Int): Boolean {
+            suspendTransaction {
+                // omg raw sql!!!
+                TransactionManager.current().exec(
+                    "UPDATE weekly_tasking__task_todos " +
+                            "SET is_completed = NOT is_completed " +
+                            "WHERE id = $todoId;"
+                )
+            }
+
+            return suspendTransaction {
+                TaskTodosTable.select(TaskTodosTable.isCompleted)
+                    .where { TaskTodosTable.id eq todoId }
+                    .single()
+            }[TaskTodosTable.isCompleted]
         }
     }
 }
