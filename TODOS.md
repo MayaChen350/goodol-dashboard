@@ -27,10 +27,10 @@ Goal is to informatize a "system" that was literally placing dots on plasticized
 - [X] People
     - [X] Edit fields
     - [X] Get them
-- [ ] Weeks
+- [X] Weeks
     - [X] Create a new week
     - [X] Get/Create current week id based on date sent
-    - [ ] Garbage collect weeks with no tasks
+    - [X] Garbage collect weeks with no tasks
 - [X] Categories
     - [X] Get all categories
     - [X] Add categories

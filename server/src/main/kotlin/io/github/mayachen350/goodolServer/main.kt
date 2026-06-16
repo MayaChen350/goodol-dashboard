@@ -14,6 +14,10 @@ suspend fun Application.rootModule(dbConnection: DbConnection) {
     configureSerialization()
     configureSessionCookies()
     configureRouting()
+
+    setup()
+
+    println("Server ready.")
 }
 
 fun main(args: Array<String>) {
