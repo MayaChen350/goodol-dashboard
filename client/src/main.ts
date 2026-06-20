@@ -1,9 +1,9 @@
-import { copyTemplate } from './core/utils'
+import { Component } from './core/types'
 import { initModules } from './modules/init'
 import './style.css'
 
-export class MenuElem {
-  private readonly templateId: string = "link-template"
+export class MenuElem extends Component {
+  protected readonly templateId: string = "link-template"
 
   public name: string
   public url: string
@@ -12,26 +12,11 @@ export class MenuElem {
   public it: null | ParentNode = null
 
   constructor(name: string, url: string, color: string) {
+    super()
+
     this.name = name
     this.url = url
     this.color = color
-  }
-
-  initAt(querySelector: string) {
-    this.init(document.querySelector(querySelector)!!)
-  }
-
-  init(where: ParentNode) {
-    if (this.it !== null) throw Error("Element of template: #" + this.templateId + " was attempted to be initialized twice!")
-
-    const root = this.it = copyTemplate(this.templateId)
-    this.update()
-
-    const subReference = root.firstChild!!;
-    where.appendChild(root)
-
-    // assign a reference in the dom to the element
-    this.it = subReference.parentNode
   }
 
   update() {
