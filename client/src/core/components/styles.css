@@ -1,3 +1,9 @@
 .menu-item {
-    @apply text-3xl font-bold
+    background-color: var(--color-primary);
+    @apply p-2 rounded;
+
+    a {
+        color: var(--color-on-primary);
+        @apply text-3xl font-bold;
+    }
 }

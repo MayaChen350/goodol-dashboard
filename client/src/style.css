@@ -1,5 +1,14 @@
 @import "core/components/styles.css";
+@import "/src/core/styles/materialui.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+    background-color: var(--color-background);
+}
+
+#app {
+    @apply flex justify-center items-center h-screen w-screen;
+}
