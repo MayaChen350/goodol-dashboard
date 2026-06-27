@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.text-sideway {
+    /*writing-mode doesn't seem to work on safari ios 10 */
+    transform: rotate(270deg);
+}
+
+th:empty {
+    @apply border-0;
+}
+
+td:empty {
+    @apply w-20 h-20
+}
+
+.todo-table .tr, th, td {
+    @apply border-solid border-2 border-black
+}
+
+.todos-table td.text-sideway {
+    text-align: center;
+}
+
+.people-table {
+    tr:first-child td:nth-of-type(2) {
+        background-color: aqua;
+    }
+
+    tr:nth-child(2) td:nth-of-type(2) {
+        background-color: orange;
+    }
+
+    tr:last-child td:nth-of-type(2) {
+        background-color: rebeccapurple;
+    }
+}
